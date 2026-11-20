@@ -313,7 +313,7 @@ Needs the Keycloak authority, client id and secret from the user, and the redire
 
 - [ ] **Step 2: Login and booking.** Open `http://localhost:8080` in a private window → redirected to Keycloak → log in → back on the day view; header shows your name and **Log out**. Book a desk → row shows "You". Admin → People lists you with your Keycloak email.
 
-- [ ] **Step 3: No duplicates.** Log out → you land on the Keycloak login page. Log in again → Admin → People still lists you once.
+- [ ] **Step 3: No duplicates.** Before clicking Log out, inspect the header form: the hidden `__RequestVerificationToken` input must have a non-empty value (the app renders with `prerender: false`; if it's empty, Log out returns 400 and the form needs another token source). Log out → you land on the Keycloak login page. Log in again → Admin → People still lists you once.
 
 - [ ] **Step 4: Deactivated (Review Focus 4).** Admin → People → untick yourself. Reload. Book something → "Your profile is inactive — ask an admin." Log out and in again → still inactive. Tick yourself active again.
 

@@ -35,8 +35,16 @@ public static class AuthFeature
                 oidc.ClientId = keycloak.Value.ClientId;
                 oidc.ClientSecret = keycloak.Value.ClientSecret;
                 oidc.ResponseType = OpenIdConnectResponseType.Code;
-                // form_post needs SameSite=None cookies, which browsers drop without HTTPS (dev runs on http://localhost).
+                // Keycloak returns with a top-level GET (not form_post), so the correlation and nonce cookies
+                // can be SameSite=Lax and needn't be Secure. The defaults (None + Secure) are dropped by browsers
+                // on plain http://<host>:8080, which would make every login fail. Behind the HTTPS proxy
+                // (forwarded headers on), SameAsRequest still marks them Secure.
                 oidc.ResponseMode = OpenIdConnectResponseMode.Query;
+                oidc.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                oidc.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                oidc.NonceCookie.SameSite = SameSiteMode.Lax;
+                oidc.NonceCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                oidc.Events.OnRemoteFailure = HandleRemoteFailureAsync;
                 oidc.Scope.Clear();
                 oidc.Scope.Add("openid");
                 oidc.Scope.Add("profile");
@@ -52,6 +60,23 @@ public static class AuthFeature
 
         services.AddScoped<IPersonDirectory, PersonDirectory>();
         return services;
+    }
+
+    /// <summary>
+    /// A failed callback (wrong secret, bad issuer, lost correlation cookie…) would otherwise go to /Error,
+    /// which needs login, which redirects to Keycloak, which sends the user straight back: an endless loop.
+    /// Answer with a plain error page instead and log the real reason.
+    /// </summary>
+    public static async Task HandleRemoteFailureAsync(RemoteFailureContext context)
+    {
+        context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+            .CreateLogger(typeof(AuthFeature))
+            .LogError(context.Failure, "Keycloak login failed");
+
+        context.HandleResponse();
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "text/plain; charset=utf-8";
+        await context.Response.WriteAsync("Login failed. Please try again later or contact the administrator.");
     }
 
     public static WebApplication MapAuthEndpoints(this WebApplication app)
