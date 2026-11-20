@@ -1,0 +1,26 @@
+services:
+  db:
+    # Pinned: postgres:18 moved its data directory, which would break the volume below.
+    image: postgres:17
+    environment:
+      POSTGRES_DB: booking
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025" # web UI
+      - "1025:1025" # SMTP
+
+volumes:
+  pgdata:
