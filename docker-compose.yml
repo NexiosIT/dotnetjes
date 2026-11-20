@@ -1,4 +1,17 @@
 services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ConnectionStrings__Booking: "Host=db;Port=5432;Database=booking;Username=booking;Password=booking"
+      Smtp__Host: mailpit
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
   db:
     # Pinned: postgres:18 moved its data directory, which would break the volume below.
     image: postgres:17
