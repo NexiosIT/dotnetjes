@@ -20,6 +20,8 @@ public class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbCo
         modelBuilder.Entity<Resource>(resource =>
         {
             resource.Property(r => r.Type).HasConversion<string>().HasMaxLength(20);
+            // Text, not a number: adding or reordering enum values needs no migration.
+            resource.Property(r => r.Location).HasConversion<string>();
             resource.HasIndex(r => r.Code).IsUnique().HasDatabaseName(ResourceCodeIndex);
         });
 

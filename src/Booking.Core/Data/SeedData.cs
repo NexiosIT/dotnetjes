@@ -19,9 +19,21 @@ public static class SeedData
         {
             db.Resources.Add(new Resource { Code = $"D{i}", Name = $"Desk {i}", Type = ResourceType.Desk });
         }
-        for (var i = 1; i <= 4; i++)
+        (ParkingLocation Location, bool HasCharger)[] parking =
+        [
+            (ParkingLocation.Basement, true),
+            (ParkingLocation.Basement, false),
+            (ParkingLocation.Outside, true),
+            (ParkingLocation.BehindTheBuilding, false)
+        ];
+        for (var i = 1; i <= parking.Length; i++)
         {
-            db.Resources.Add(new Resource { Code = $"P{i}", Name = $"Parking {i}", Type = ResourceType.Parking });
+            var (location, hasCharger) = parking[i - 1];
+            db.Resources.Add(new Resource
+            {
+                Code = $"P{i}", Name = $"Parking {i}", Type = ResourceType.Parking,
+                Location = location, HasCharger = hasCharger
+            });
         }
         foreach (var name in PeopleNames)
         {

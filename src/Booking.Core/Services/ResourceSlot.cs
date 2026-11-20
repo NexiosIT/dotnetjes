@@ -12,4 +12,6 @@ public sealed record ResourceSlot(
     ResourceType Type,
     int? BookingId,
     int? BookedByPersonId,
-    string? BookedByName);
+    string? BookedByName,
+    ParkingLocation? Location = null,
+    bool HasCharger = false);

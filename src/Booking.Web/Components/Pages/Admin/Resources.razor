@@ -42,7 +42,7 @@ else
 {
     <table class="table align-middle">
         <thead>
-            <tr><th>Code</th><th>Name</th><th>Type</th><th>Active</th><th></th></tr>
+            <tr><th>Code</th><th>Name</th><th>Type</th><th>Location</th><th>Charger</th><th>Active</th><th></th></tr>
         </thead>
         <tbody>
             @foreach (var r in resources)
@@ -59,6 +59,28 @@ else
                         <td>@r.Name</td>
                     }
                     <td>@r.Type</td>
+                    @if (r.Type == ResourceType.Parking)
+                    {
+                        <td>
+                            <select class="form-select form-select-sm" aria-label="Location"
+                                    value="@(r.Location?.ToString() ?? "")" @onchange="e => SetLocationAsync(r, e.Value as string)">
+                                <option value="">— not set —</option>
+                                @foreach (var location in ParkingLocations.All)
+                                {
+                                    <option value="@location">@ParkingLocations.Label(location)</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input type="checkbox" class="form-check-input" checked="@r.HasCharger"
+                                   aria-label="EV charger" @onchange="() => ToggleChargerAsync(r)" />
+                        </td>
+                    }
+                    else
+                    {
+                        <td class="text-muted">—</td>
+                        <td class="text-muted">—</td>
+                    }
                     <td>
                         <input type="checkbox" class="form-check-input" checked="@r.IsActive"
                                aria-label="Active" @onchange="() => ToggleActiveAsync(r)" />
@@ -121,6 +143,13 @@ else
 
     private Task ToggleActiveAsync(Resource r) =>
         RunAsync(() => Admin.UpdateResourceAsync(r.Id, r.Code, r.Name, !r.IsActive));
+
+    private Task SetLocationAsync(Resource r, string? value) =>
+        RunAsync(() => Admin.SetParkingDetailsAsync(
+            r.Id, Enum.TryParse<ParkingLocation>(value, out var location) ? location : null, r.HasCharger));
+
+    private Task ToggleChargerAsync(Resource r) =>
+        RunAsync(() => Admin.SetParkingDetailsAsync(r.Id, r.Location, !r.HasCharger));
 
     /// <summary>Runs an admin change, shows a validation message if it was refused, and reloads the table either way.</summary>
     private async Task RunAsync(Func<Task> change)

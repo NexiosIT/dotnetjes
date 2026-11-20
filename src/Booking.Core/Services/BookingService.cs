@@ -32,8 +32,8 @@ public sealed class BookingService(
 
         var slots = resources
             .Select(r => bookings.TryGetValue(r.Id, out var b)
-                ? new ResourceSlot(r.Id, r.Code, r.Name, r.Type, b.Id, b.PersonId, b.PersonName)
-                : new ResourceSlot(r.Id, r.Code, r.Name, r.Type, null, null, null))
+                ? new ResourceSlot(r.Id, r.Code, r.Name, r.Type, b.Id, b.PersonId, b.PersonName, r.Location, r.HasCharger)
+                : new ResourceSlot(r.Id, r.Code, r.Name, r.Type, null, null, null, r.Location, r.HasCharger))
             .ToList();
 
         var peopleInOffice = bookings.Values
