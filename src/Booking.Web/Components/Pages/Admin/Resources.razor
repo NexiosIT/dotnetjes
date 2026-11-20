@@ -1,6 +1,139 @@
 @page "/admin/resources"
 @* Owned by Person C — task C2. *@
+@inject IAdminService Admin
 
 <PageTitle>Admin · Desks & parking</PageTitle>
 
 <h1>Desks & parking</h1>
+
+<AdminTabs />
+
+<form class="row g-2 align-items-end mb-3" @onsubmit="AddAsync">
+    <div class="col-auto">
+        <label class="form-label" for="new-code">Code</label>
+        <input id="new-code" class="form-control" @bind="newCode" placeholder="D9" />
+    </div>
+    <div class="col-auto">
+        <label class="form-label" for="new-name">Name</label>
+        <input id="new-name" class="form-control" @bind="newName" placeholder="Desk 9" />
+    </div>
+    <div class="col-auto">
+        <label class="form-label" for="new-type">Type</label>
+        <select id="new-type" class="form-select" @bind="newType">
+            <option value="@ResourceType.Desk">Desk</option>
+            <option value="@ResourceType.Parking">Parking</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Add</button>
+    </div>
+</form>
+
+@if (error is not null)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (resources is null)
+{
+    <p><em>Loading…</em></p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr><th>Code</th><th>Name</th><th>Type</th><th>Active</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var r in resources)
+            {
+                <tr @key="r.Id" class="@(r.IsActive ? null : "text-muted")">
+                    @if (editingId == r.Id)
+                    {
+                        <td><input class="form-control form-control-sm" @bind="editCode" aria-label="Code" /></td>
+                        <td><input class="form-control form-control-sm" @bind="editName" aria-label="Name" /></td>
+                    }
+                    else
+                    {
+                        <td>@r.Code</td>
+                        <td>@r.Name</td>
+                    }
+                    <td>@r.Type</td>
+                    <td>
+                        <input type="checkbox" class="form-check-input" checked="@r.IsActive"
+                               aria-label="Active" @onchange="() => ToggleActiveAsync(r)" />
+                    </td>
+                    <td class="text-end">
+                        @if (editingId == r.Id)
+                        {
+                            <button class="btn btn-sm btn-primary" @onclick="() => SaveEditAsync(r)">Save</button>
+                            <button class="btn btn-sm btn-link" @onclick="CancelEdit">Cancel</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEdit(r)">Edit</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<Resource>? resources;
+    private string? error;
+
+    private string newCode = "";
+    private string newName = "";
+    private ResourceType newType = ResourceType.Desk;
+
+    private int? editingId;
+    private string editCode = "";
+    private string editName = "";
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => resources = await Admin.GetResourcesAsync();
+
+    private Task AddAsync() => RunAsync(async () =>
+    {
+        await Admin.AddResourceAsync(newCode, newName, newType);
+        newCode = "";
+        newName = "";
+    });
+
+    private void StartEdit(Resource r)
+    {
+        editingId = r.Id;
+        editCode = r.Code;
+        editName = r.Name;
+        error = null;
+    }
+
+    private void CancelEdit() => editingId = null;
+
+    private Task SaveEditAsync(Resource r) => RunAsync(async () =>
+    {
+        await Admin.UpdateResourceAsync(r.Id, editCode, editName, r.IsActive);
+        editingId = null;
+    });
+
+    private Task ToggleActiveAsync(Resource r) =>
+        RunAsync(() => Admin.UpdateResourceAsync(r.Id, r.Code, r.Name, !r.IsActive));
+
+    /// <summary>Runs an admin change, shows a validation message if it was refused, and reloads the table either way.</summary>
+    private async Task RunAsync(Func<Task> change)
+    {
+        try
+        {
+            await change();
+            error = null;
+        }
+        catch (AdminValidationException ex)
+        {
+            error = ex.Message;
+        }
+        await LoadAsync();
+    }
+}

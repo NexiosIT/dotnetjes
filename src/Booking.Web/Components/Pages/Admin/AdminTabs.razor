@@ -1,0 +1,60 @@
+@* Owned by Person C. Shared header of the admin pages. *@
+@using Booking.Core.Notifications
+@inject DailySummarySender SummarySender
+@inject ILogger<AdminTabs> Logger
+
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <ul class="nav nav-tabs flex-grow-1">
+        <li class="nav-item">
+            <NavLink class="nav-link" href="admin/resources">Desks & parking</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="admin/people">People</NavLink>
+        </li>
+    </ul>
+    <div class="d-flex align-items-center gap-2">
+        @if (summaryMessage is not null)
+        {
+            <span class="@(summaryOk ? "text-success" : "text-danger")" role="status">@summaryMessage</span>
+        }
+        <button class="btn btn-outline-primary" disabled="@sending" @onclick="SendSummaryAsync">
+            @(sending ? "Sending…" : "Send today's summary now")
+        </button>
+    </div>
+</div>
+
+@code {
+    private bool sending;
+    private string? summaryMessage;
+    private bool summaryOk;
+
+    private async Task SendSummaryAsync()
+    {
+        // A fast double click reaches the server before the disabled button does: send once.
+        if (sending)
+        {
+            return;
+        }
+        sending = true;
+        summaryMessage = null;
+        try
+        {
+            var result = await SummarySender.SendTodayAsync(CancellationToken.None);
+            summaryOk = result.Failed == 0;
+            summaryMessage = summaryOk
+                ? $"Sent {result.Sent} emails."
+                : $"Sent {result.Sent}, failed {result.Failed} — check the logs.";
+        }
+        catch (Exception ex)
+        {
+            // E.g. the database is unreachable: report it here rather than kill the admin's session.
+            Logger.LogError(ex, "Sending the daily summary from the admin page failed");
+            summaryOk = false;
+            summaryMessage = "Couldn't send the summary — check the logs.";
+        }
+        finally
+        {
+            sending = false;
+        }
+    }
+}

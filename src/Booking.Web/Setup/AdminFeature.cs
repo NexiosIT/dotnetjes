@@ -1,4 +1,6 @@
 using Booking.Core.Admin;
+using Booking.Core.Notifications;
+using Booking.Web.Notifications;
 
 namespace Booking.Web.Setup;
 
@@ -7,9 +9,12 @@ public static class AdminFeature
 {
     public static IServiceCollection AddAdminFeature(this IServiceCollection services, IConfiguration configuration)
     {
-        // C1 swaps this for the real AdminService (scoped); C5 adds email and the background job.
-        // Fully qualified (no using) so deleting the Stubs folder never breaks another person's Setup file.
-        services.AddSingleton<IAdminService, Stubs.StubAdminService>();
+        services.AddScoped<IAdminService, AdminService>();
+
+        services.Configure<SmtpOptions>(configuration.GetSection("Smtp"));
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddScoped<DailySummarySender>();
+        services.AddHostedService<DailySummaryService>();
         return services;
     }
 }
