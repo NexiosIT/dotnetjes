@@ -27,13 +27,18 @@
 }
 else
 {
+    @if (_message is not null)
+    {
+        <p class="alert alert-warning py-2" role="alert">@_message</p>
+    }
+
     <div class="row g-4">
         <div class="col-md-6">
             <h2 class="h6 text-uppercase">Desks</h2>
             <ul class="list-group">
                 @foreach (var slot in _day.Desks)
                 {
-                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Book="Book" Cancel="Cancel" />
+                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
                 }
             </ul>
         </div>
@@ -42,7 +47,7 @@ else
             <ul class="list-group">
                 @foreach (var slot in _day.Parking)
                 {
-                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Book="Book" Cancel="Cancel" />
+                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
                 }
             </ul>
         </div>
@@ -64,6 +69,8 @@ else
     private DateOnly _date;
     private DayOverview? _day;
     private int? _personId;
+    private string? _message;   // result of the last Book/Cancel; cleared on the next action or day change
+    private bool _busy;         // a Book/Cancel call is running — buttons are disabled
 
     private bool CanGoBack => Calendar.PreviousWeekday(_date) >= Calendar.FirstBookableDay;
 
@@ -82,6 +89,7 @@ else
     private async Task GoBack()
     {
         if (!CanGoBack) return;
+        _message = null;
         _date = Calendar.PreviousWeekday(_date);
         await LoadDay();
     }
@@ -89,14 +97,39 @@ else
     private async Task GoForward()
     {
         if (!CanGoForward) return;
+        _message = null;
         _date = Calendar.NextWeekday(_date);
         await LoadDay();
     }
 
-    // Wired up in task B3.
-    private Task Book(ResourceSlot slot) => Task.CompletedTask;
+    private Task Book(ResourceSlot slot) =>
+        _personId is int personId
+            ? Run(slot, () => Bookings.BookAsync(personId, slot.ResourceId, _date))
+            : Task.CompletedTask;
 
-    private Task Cancel(ResourceSlot slot) => Task.CompletedTask;
+    private Task Cancel(ResourceSlot slot) =>
+        _personId is int personId && slot.BookingId is int bookingId
+            ? Run(slot, () => Bookings.CancelAsync(personId, bookingId))
+            : Task.CompletedTask;
+
+    /// <summary>Runs one Book/Cancel, shows its error (if any) and always reloads the day, success or not.</summary>
+    private async Task Run(ResourceSlot slot, Func<Task<BookingResult>> action)
+    {
+        if (_busy) return;
+        _busy = true;
+        _message = null;
+        try
+        {
+            var result = await action();
+            if (result.Error is BookingError error)
+                _message = BookingMessages.For(error, slot);
+            await LoadDay();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
 
     private void OnCurrentUserChanged() => _ = InvokeAsync(async () =>
     {
