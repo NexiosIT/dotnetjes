@@ -26,9 +26,9 @@ else
         <p class="alert alert-warning py-2" role="alert">@_message</p>
     }
 
-    @if (_parkedCode is not null)
+    @if (_car is var (carCode, leaving))
     {
-        <ParkedCar @key="_parkedCode" Code="@_parkedCode" Closed="() => _parkedCode = null" />
+        <ParkedCar @key="(carCode, leaving)" Code="@carCode" Leaving="leaving" Closed="() => _car = null" />
     }
 
     <div class="row g-4">
@@ -93,7 +93,7 @@ else
     private bool _busy;         // a Book/Cancel call is running — buttons are disabled
     private ParkingLocation? _location;   // parking filter; null = all locations
     private bool _chargerOnly;           // parking filter: only spots with an EV charger
-    private string? _parkedCode;         // just booked this parking spot: show the car driving in
+    private (string Code, bool Leaving)? _car;   // last parking Book/Cancel: car drives in, or out and crashes
 
     private bool CanGoBack => Calendar.PreviousWeekday(_date) >= Calendar.FirstBookableDay;
 
@@ -112,7 +112,7 @@ else
     {
         if (!CanGoBack) return;
         _message = null;
-        _parkedCode = null;
+        _car = null;
         _date = Calendar.PreviousWeekday(_date);
         await LoadDay();
     }
@@ -121,7 +121,7 @@ else
     {
         if (!CanGoForward) return;
         _message = null;
-        _parkedCode = null;
+        _car = null;
         _date = Calendar.NextWeekday(_date);
         await LoadDay();
     }
@@ -142,14 +142,14 @@ else
         if (_busy) return;
         _busy = true;
         _message = null;
-        _parkedCode = null;
+        _car = null;
         try
         {
             var result = await action();
             if (result.Error is BookingError error)
                 _message = BookingMessages.For(error, slot);
-            else if (slot.Type == ResourceType.Parking && slot.BookingId is null)
-                _parkedCode = slot.Code;   // a new parking booking (not a cancel)
+            else if (slot.Type == ResourceType.Parking)
+                _car = (slot.Code, Leaving: slot.BookingId is not null);   // had a booking = this was a cancel
             await LoadDay();
         }
         finally

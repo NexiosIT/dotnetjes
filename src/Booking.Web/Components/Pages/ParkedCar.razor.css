@@ -48,6 +48,9 @@
     border: 0;
     background: none;
     cursor: pointer;
+}
+
+.car.arriving {
     animation: drive-in 1.6s cubic-bezier(.2, .8, .3, 1) both;
 }
 
@@ -67,5 +70,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .car { animation: none; }
+    .car.arriving { animation: none; }
 }
