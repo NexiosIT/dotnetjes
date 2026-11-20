@@ -91,8 +91,16 @@ public class AuthFeatureTests
 
         Assert.True((await authorization.AuthorizeAsync(User("Admin"), AdminAccess.Policy)).Succeeded);
         Assert.False((await authorization.AuthorizeAsync(User(), AdminAccess.Policy)).Succeeded);
-        Assert.False((await authorization.AuthorizeAsync(User("admin"), AdminAccess.Policy)).Succeeded);
+        Assert.False((await authorization.AuthorizeAsync(User("viewer", "Administrator"), AdminAccess.Policy)).Succeeded);
     }
+
+    [Theory]
+    [InlineData("admin")]
+    [InlineData("ADMIN")]
+    [InlineData("aDmIn")]
+    public async Task Admin_policy_ignores_case(string role) =>
+        Assert.True((await ConfiguredServices().GetRequiredService<IAuthorizationService>()
+            .AuthorizeAsync(User(role), AdminAccess.Policy)).Succeeded);
 
     [Fact]
     public void Cookie_sends_forbidden_users_to_access_denied() =>

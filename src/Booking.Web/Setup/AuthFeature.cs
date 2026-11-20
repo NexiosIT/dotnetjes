@@ -70,7 +70,8 @@ public static class AuthFeature
         services.AddAuthorization(options =>
         {
             options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-            options.AddPolicy(AdminAccess.Policy, policy => policy.RequireAuthenticatedUser().RequireRole(AdminAccess.Role));
+            options.AddPolicy(AdminAccess.Policy, policy => policy.RequireAuthenticatedUser().RequireAssertion(context =>
+                context.User.Claims.Any(c => c.Type == AdminAccess.RoleClaimType && string.Equals(c.Value, AdminAccess.Role, StringComparison.OrdinalIgnoreCase))));
         });
         services.AddCascadingAuthenticationState();
 
