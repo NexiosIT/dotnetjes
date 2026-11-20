@@ -6,10 +6,10 @@ namespace Booking.Web.Tests;
 public class WaitlistMessagesTests
 {
     [Fact]
-    public void Every_error_has_a_message() =>
+    public void WhenGettingTheMessageForEveryWaitlistError_ThenNoneIsBlank() =>
         Assert.All(Enum.GetValues<WaitlistError>(), e => Assert.False(string.IsNullOrWhiteSpace(WaitlistMessages.For(e))));
 
     [Fact]
-    public void NoEmail_points_to_company_account() =>
+    public void GivenTheNoEmailError_WhenGettingItsMessage_ThenItMentionsTheCompanyAccount() =>
         Assert.Contains("company account", WaitlistMessages.For(WaitlistError.NoEmail));
 }

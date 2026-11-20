@@ -9,7 +9,7 @@ public class ChannelWaitlistNotifierTests
     private static readonly ChargerSpotFreed Freed = new(new DateOnly(2026, 11, 24), 1, 2);
 
     [Fact]
-    public void ChargerSpotFreed_is_readable_from_the_reader()
+    public void GivenANotifier_WhenAChargerSpotIsFreed_ThenTheEventIsReadableFromTheReader()
     {
         var notifier = new ChannelWaitlistNotifier(NullLogger<ChannelWaitlistNotifier>.Instance);
 
@@ -20,7 +20,7 @@ public class ChannelWaitlistNotifierTests
     }
 
     [Fact]
-    public void ChargerSpotFreed_never_blocks_or_throws_when_queue_is_full()
+    public void GivenAFullQueue_WhenAChargerSpotIsFreed_ThenItNeitherBlocksNorThrowsAndTheQueueStaysAtCapacity()
     {
         var notifier = new ChannelWaitlistNotifier(NullLogger<ChannelWaitlistNotifier>.Instance);
 

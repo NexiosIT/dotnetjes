@@ -23,7 +23,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Booking_a_charger_spot_removes_waitlist_entry()
+    public async Task GivenAnnaIsOnTheWaitlist_WhenSheBooksAChargerSpot_ThenHerWaitlistEntryIsRemoved()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await OnWaitlist(ctx, "Anna", ctx.Today);
@@ -35,7 +35,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Booking_an_ordinary_spot_keeps_waitlist_entry()
+    public async Task GivenAnnaIsOnTheWaitlist_WhenSheBooksAnOrdinarySpot_ThenHerWaitlistEntryIsKept()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await OnWaitlist(ctx, "Anna", ctx.Today);
@@ -46,7 +46,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Booking_charger_spot_keeps_entries_for_other_days()
+    public async Task GivenAnnaWaitsTodayAndTomorrow_WhenSheBooksAChargerSpotToday_ThenTomorrowsEntryIsKept()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var tomorrow = ctx.Today.AddDays(1);
@@ -59,7 +59,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Failed_charger_booking_keeps_waitlist_entry()
+    public async Task GivenP1IsTakenAndAnnaWaits_WhenAnnaBooksP1_ThenResourceTakenAndHerEntryIsKept()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Ben", "P1", ctx.Today);
@@ -72,7 +72,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancelling_charger_spot_notifies()
+    public async Task GivenBenBookedChargerSpotP1_WhenBenCancels_ThenTheFreedChargerSpotIsNotified()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Ben"), ctx.Resource("P1"), ctx.Today);
@@ -85,7 +85,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     [Theory]
     [InlineData("P2")]
     [InlineData("D1")]
-    public async Task Cancelling_ordinary_spot_or_desk_does_not_notify(string code)
+    public async Task GivenBenBookedAnOrdinarySpotOrDesk_WhenBenCancels_ThenNobodyIsNotified(string code)
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Ben"), ctx.Resource(code), ctx.Today);
@@ -96,7 +96,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Failed_cancel_does_not_notify()
+    public async Task GivenBenBookedP1_WhenAnnaCancelsIt_ThenNotYourBookingAndNobodyIsNotified()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Ben"), ctx.Resource("P1"), ctx.Today);
@@ -108,7 +108,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancelling_inactive_charger_spot_does_not_notify()
+    public async Task GivenChargerSpotP1BecameInactive_WhenBenCancelsIt_ThenNobodyIsNotified()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Ben"), ctx.Resource("P1"), ctx.Today);

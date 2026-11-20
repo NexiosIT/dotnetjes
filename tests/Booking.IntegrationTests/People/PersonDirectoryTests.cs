@@ -23,7 +23,7 @@ public sealed class PersonDirectoryTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SignIn_first_time_creates_active_person()
+    public async Task WhenANewPersonSignsIn_ThenAnActivePersonIsCreated()
     {
         var directory = await CreateAsync();
 
@@ -37,7 +37,7 @@ public sealed class PersonDirectoryTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SignIn_again_returns_same_person_and_refreshes_details()
+    public async Task GivenAnnaSignedInBefore_WhenSheSignsInAgain_ThenTheSamePersonIsReturnedWithNewDetails()
     {
         var directory = await CreateAsync();
 
@@ -52,7 +52,7 @@ public sealed class PersonDirectoryTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SignIn_same_email_different_sub_creates_separate_person()
+    public async Task GivenAnExistingEmail_WhenSigningInWithAnotherSub_ThenASeparatePersonIsCreated()
     {
         var directory = await CreateAsync();
 
@@ -64,7 +64,7 @@ public sealed class PersonDirectoryTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SignIn_keeps_deactivated_person_inactive()
+    public async Task GivenADeactivatedPerson_WhenSigningInAgain_ThenThePersonStaysInactive()
     {
         var directory = await CreateAsync();
         var person = await directory.SignInAsync("sub-1", "Anna", null);
@@ -80,7 +80,7 @@ public sealed class PersonDirectoryTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SignIn_concurrent_first_logins_create_one_person()
+    public async Task WhenTheSamePersonSignsInTenTimesAtOnce_ThenOnePersonExists()
     {
         var directory = await CreateAsync();
 

@@ -27,7 +27,7 @@ public sealed class WaitlistEmailSenderTests(PostgresFixture postgres)
         new(ctx.Today, ctx.Resource(code), ctx.Person(by));
 
     [Fact]
-    public async Task Emails_waiters_for_that_date_only()
+    public async Task GivenWaitersOnTwoDates_WhenASpotIsFreed_ThenOnlyWaitersForThatDateAreEmailed()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await Waiting(ctx, ctx.Today, "Anna", "Chris");
@@ -42,7 +42,7 @@ public sealed class WaitlistEmailSenderTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Skips_person_who_freed_the_spot()
+    public async Task GivenThePersonWhoFreedTheSpotWaits_WhenSending_ThenThatPersonIsSkipped()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await Waiting(ctx, ctx.Today, "Anna", "Ben");
@@ -54,7 +54,7 @@ public sealed class WaitlistEmailSenderTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Skips_inactive_and_emailless_waiters()
+    public async Task GivenInactiveAndEmaillessWaiters_WhenSending_ThenTheyAreSkipped()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await Waiting(ctx, ctx.Today, "Anna", "Chris", "Dana");
@@ -71,7 +71,7 @@ public sealed class WaitlistEmailSenderTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Skips_waiter_who_now_holds_a_charger_spot()
+    public async Task GivenAWaiterHoldsAChargerSpot_WhenSending_ThenThatWaiterIsSkipped()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await Waiting(ctx, ctx.Today, "Anna", "Chris");
@@ -84,7 +84,7 @@ public sealed class WaitlistEmailSenderTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task One_failing_address_does_not_stop_others()
+    public async Task GivenOneAddressFails_WhenSending_ThenTheOthersAreStillEmailedAndTheFailureIsCounted()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await Waiting(ctx, ctx.Today, "Anna", "Chris");
@@ -98,7 +98,7 @@ public sealed class WaitlistEmailSenderTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Inactive_or_non_charger_spot_sends_nothing()
+    public async Task GivenAnOrdinaryOrInactiveSpotIsFreed_WhenSending_ThenNothingIsSent()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await Waiting(ctx, ctx.Today, "Anna");

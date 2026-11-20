@@ -49,7 +49,7 @@ public class AuthFeatureTests
     }
 
     [Fact]
-    public void Correlation_and_nonce_cookies_work_over_plain_http()
+    public void WhenConfiguringTheLogin_ThenCorrelationAndNonceCookiesAreLaxAndWorkOverPlainHttp()
     {
         var oidc = ConfiguredOidc();
 
@@ -60,7 +60,7 @@ public class AuthFeatureTests
     }
 
     [Fact]
-    public async Task Failed_login_shows_an_error_instead_of_redirecting_again()
+    public async Task GivenAFailedRemoteLogin_WhenHandlingTheFailure_ThenA500ErrorPageIsShownInsteadOfRedirecting()
     {
         var http = new DefaultHttpContext
         {
@@ -79,11 +79,11 @@ public class AuthFeatureTests
     }
 
     [Fact]
-    public void Role_claims_use_the_role_type() =>
+    public void WhenConfiguringTheLogin_ThenTheRoleClaimTypeIsTheAdminRoleClaimType() =>
         Assert.Equal(AdminAccess.RoleClaimType, ConfiguredOidc().TokenValidationParameters.RoleClaimType);
 
     [Fact]
-    public async Task Admin_policy_requires_the_Admin_role()
+    public async Task WhenAuthorizingForTheAdminPolicy_ThenOnlyTheAdminRoleSucceeds()
     {
         var authorization = ConfiguredServices().GetRequiredService<IAuthorizationService>();
 
@@ -96,18 +96,18 @@ public class AuthFeatureTests
     [InlineData("admin")]
     [InlineData("ADMIN")]
     [InlineData("aDmIn")]
-    public async Task Admin_policy_ignores_case(string role) =>
+    public async Task GivenTheAdminRoleInAnyLetterCase_WhenAuthorizingForTheAdminPolicy_ThenItSucceeds(string role) =>
         Assert.True((await ConfiguredServices().GetRequiredService<IAuthorizationService>()
             .AuthorizeAsync(User(role), AdminAccess.Policy)).Succeeded);
 
     [Fact]
-    public void Cookie_sends_forbidden_users_to_access_denied() =>
+    public void WhenConfiguringTheCookie_ThenForbiddenUsersAreSentToAccessDenied() =>
         Assert.Equal("/access-denied", ConfiguredServices()
             .GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>()
             .Get(CookieAuthenticationDefaults.AuthenticationScheme).AccessDeniedPath.Value);
 
     [Fact]
-    public void Login_lasts_one_working_day_without_renewal()
+    public void WhenConfiguringTheCookie_ThenLoginLastsTenHoursAndIsNotRenewed()
     {
         var cookie = ConfiguredServices()
             .GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>()
@@ -118,7 +118,7 @@ public class AuthFeatureTests
     }
 
     [Fact]
-    public async Task Token_validated_adds_client_roles_as_role_claims()
+    public async Task GivenAnAccessTokenWithClientRoles_WhenTheTokenIsValidated_ThenTheyBecomeRoleClaims()
     {
         var context = TokenValidated(TestTokens.WithPayload("""{"resource_access":{"app":{"roles":["Admin"]}}}"""));
 
@@ -128,7 +128,7 @@ public class AuthFeatureTests
     }
 
     [Fact]
-    public async Task Token_validated_ignores_role_claims_from_the_id_token()
+    public async Task GivenAnIdTokenRoleClaim_WhenTheTokenIsValidated_ThenOnlyAccessTokenRolesAreKept()
     {
         var context = TokenValidated(TestTokens.WithPayload("""{"resource_access":{"app":{"roles":["viewer"]}}}"""));
         ((ClaimsIdentity)context.Principal!.Identity!).AddClaim(new Claim(AdminAccess.RoleClaimType, "Admin"));
@@ -140,7 +140,7 @@ public class AuthFeatureTests
     }
 
     [Fact]
-    public async Task Token_validated_without_access_token_adds_no_roles()
+    public async Task GivenNoAccessToken_WhenTheTokenIsValidated_ThenNoRoleClaimsAreAdded()
     {
         var context = TokenValidated(null);
 

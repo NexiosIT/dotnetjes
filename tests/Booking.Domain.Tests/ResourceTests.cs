@@ -3,7 +3,7 @@ namespace Booking.Domain.Tests;
 public class ResourceTests
 {
     [Fact]
-    public void Create_trims_and_uppercases_the_code()
+    public void WhenCreatingAResource_ThenTheCodeIsTrimmedAndUpperCased()
     {
         var desk = Resource.Create(" d9 ", " Desk 9 ", ResourceType.Desk);
 
@@ -18,11 +18,11 @@ public class ResourceTests
     [Theory]
     [InlineData(" ", "Desk", "Code is required.")]
     [InlineData("D1", "", "Name is required.")]
-    public void Create_requires_code_and_name(string code, string name, string message) =>
+    public void GivenABlankCodeOrName_WhenCreatingAResource_ThenAValidationErrorIsThrown(string code, string name, string message) =>
         Assert.Equal(message, Assert.Throws<DomainValidationException>(() => Resource.Create(code, name, ResourceType.Desk)).Message);
 
     [Fact]
-    public void Update_changes_code_name_and_active()
+    public void WhenUpdatingAResource_ThenCodeNameAndActiveFlagChange()
     {
         var desk = Fixtures.Desk();
 
@@ -34,11 +34,11 @@ public class ResourceTests
     }
 
     [Fact]
-    public void Update_requires_code_and_name() =>
+    public void GivenABlankCode_WhenUpdatingAResource_ThenAValidationErrorIsThrown() =>
         Assert.Throws<DomainValidationException>(() => Fixtures.Desk().Update("", "x", true));
 
     [Fact]
-    public void Parking_spot_gets_location_and_charger()
+    public void GivenAParkingSpot_WhenSettingParkingDetails_ThenLocationAndChargerAreStored()
     {
         var spot = Resource.Create("P9", "Parking 9", ResourceType.Parking);
 
@@ -51,15 +51,15 @@ public class ResourceTests
     [Theory]
     [InlineData(ParkingLocation.Outside, false)]
     [InlineData(null, true)]
-    public void Desk_cannot_get_location_or_charger(ParkingLocation? location, bool charger) =>
+    public void GivenADesk_WhenSettingALocationOrCharger_ThenAValidationErrorIsThrown(ParkingLocation? location, bool charger) =>
         Assert.Equal("Only parking spots have a location or charger.",
             Assert.Throws<DomainValidationException>(() => Fixtures.Desk().SetParkingDetails(location, charger)).Message);
 
     [Fact]
-    public void Desk_accepts_no_parking_details() => Fixtures.Desk().SetParkingDetails(null, false);
+    public void GivenADesk_WhenClearingParkingDetails_ThenNoErrorIsThrown() => Fixtures.Desk().SetParkingDetails(null, false);
 
     [Fact]
-    public void Charger_spot_is_an_active_parking_spot_with_charger()
+    public void WhenCheckingForAChargerSpot_ThenOnlyAnActiveParkingSpotWithAChargerQualifies()
     {
         var spot = Fixtures.ChargerSpot();
         Assert.True(spot.IsChargerSpot);

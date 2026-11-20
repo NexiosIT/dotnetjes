@@ -31,7 +31,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_succeeds_when_all_charger_spots_taken()
+    public async Task GivenAllChargerSpotsAreTaken_WhenAnnaJoinsTheWaitlist_ThenSheIsOnIt()
     {
         var ctx = await AllChargersTaken(postgres);
         var waitlist = Service(ctx);
@@ -44,7 +44,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_refused_while_a_charger_spot_is_free()
+    public async Task GivenAChargerSpotIsFree_WhenAnnaJoinsTheWaitlist_ThenChargerSpotFreeAndNothingIsStored()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Ben", "P1", ctx.Today);
@@ -56,7 +56,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_ignores_inactive_free_charger_spot()
+    public async Task GivenTheOnlyFreeChargerSpotIsInactive_WhenAnnaJoinsTheWaitlist_ThenItSucceeds()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Ben", "P1", ctx.Today);
@@ -68,7 +68,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_refused_for_person_with_charger_spot()
+    public async Task GivenAnnaHoldsAChargerSpot_WhenAnnaJoinsTheWaitlist_ThenAlreadyHasCharger()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P1", ctx.Today);
@@ -80,7 +80,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_refused_without_email()
+    public async Task GivenAnnaHasNoEmail_WhenAnnaJoinsTheWaitlist_ThenNoEmail()
     {
         var ctx = await AllChargersTaken(postgres);
         await SetEmail(ctx, "Anna", null);
@@ -91,7 +91,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_refused_for_inactive_person()
+    public async Task GivenAnnaIsInactive_WhenAnnaJoinsTheWaitlist_ThenPersonInactive()
     {
         var ctx = await AllChargersTaken(postgres);
         await ctx.DeactivatePerson("Anna");
@@ -102,7 +102,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_refused_on_weekend()
+    public async Task WhenAnnaJoinsTheWaitlistForAWeekendDay_ThenWeekend()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -114,7 +114,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     [Theory]
     [InlineData(-1)]
     [InlineData(20)]
-    public async Task Join_refused_out_of_range(int days)
+    public async Task WhenAnnaJoinsTheWaitlistForADayOutOfRange_ThenOutOfRange(int days)
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -124,7 +124,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_unknown_person_is_NotFound()
+    public async Task WhenAnUnknownPersonJoinsTheWaitlist_ThenNotFound()
     {
         var ctx = await AllChargersTaken(postgres);
 
@@ -134,7 +134,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Join_twice_is_fine_one_entry()
+    public async Task GivenAllChargerSpotsAreTaken_WhenAnnaJoinsTwice_ThenBothSucceedAndOneEntryExists()
     {
         var ctx = await AllChargersTaken(postgres);
         var waitlist = Service(ctx);
@@ -148,7 +148,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Concurrent_joins_create_one_entry()
+    public async Task GivenAllChargerSpotsAreTaken_WhenAnnaJoinsTwiceAtOnce_ThenOneEntryExists()
     {
         var ctx = await AllChargersTaken(postgres);
 
@@ -161,7 +161,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Can_join_several_days()
+    public async Task GivenAllChargerSpotsAreTakenOnTwoDays_WhenAnnaJoinsBoth_ThenTwoEntriesExist()
     {
         var ctx = await AllChargersTaken(postgres);
         var tomorrow = ctx.Today.AddDays(1);
@@ -176,7 +176,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Leave_removes_entry_and_is_fine_when_absent()
+    public async Task GivenAnnaIsOnTheWaitlist_WhenSheLeavesTwice_ThenTheEntryIsRemovedAndTheSecondLeaveIsFine()
     {
         var ctx = await AllChargersTaken(postgres);
         var waitlist = Service(ctx);
@@ -192,7 +192,7 @@ public sealed class WaitlistServiceTests(PostgresFixture postgres)
     [Theory]
     [InlineData(null)]
     [InlineData("  ")]
-    public async Task HasEmail_reflects_person_email(string? missing)
+    public async Task GivenAnnaHasAnEmail_WhenItIsRemovedOrBlank_ThenHasEmailTurnsFalse(string? missing)
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var waitlist = Service(ctx);

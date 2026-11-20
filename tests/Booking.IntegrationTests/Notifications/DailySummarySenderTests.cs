@@ -24,7 +24,7 @@ public sealed class DailySummarySenderTests
             NullLogger<DailySummarySender>.Instance);
 
     [Fact]
-    public async Task Send_goes_to_each_active_person_with_email()
+    public async Task GivenInactiveAndEmaillessPeople_WhenSendingTheSummary_ThenOnlyActivePeopleWithEmailGetIt()
     {
         var emails = new RecordingEmailSender();
         var bookings = new FakeBookingService(Days.With(Today));
@@ -37,7 +37,7 @@ public sealed class DailySummarySenderTests
     }
 
     [Fact]
-    public async Task Send_survives_a_failing_address()
+    public async Task GivenOneAddressFails_WhenSendingTheSummary_ThenTheOthersStillGetIt()
     {
         var emails = new RecordingEmailSender(failFor: "ben@example.com");
 

@@ -20,7 +20,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task AddResource_normalizes_code()
+    public async Task GivenACodeAndNameWithSpacesAndLowerCase_WhenAddingAResource_ThenTheyAreTrimmedAndTheCodeIsUpperCase()
     {
         var service = await CreateAsync();
 
@@ -34,7 +34,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task AddResource_rejects_duplicate_code()
+    public async Task GivenCodeD1Exists_WhenAddingAResourceWithCodeD1_ThenItIsRejectedAsDuplicate()
     {
         var service = await CreateAsync();
 
@@ -45,7 +45,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task UpdateResource_rejects_code_of_another_resource()
+    public async Task GivenTwoResources_WhenD2GetsTheCodeOfD1_ThenTheUpdateIsRejectedAsDuplicate()
     {
         var service = await CreateAsync();
         var d2 = (await service.GetResourcesAsync()).Single(r => r.Code == "D2");
@@ -57,7 +57,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task AddResource_requires_code_and_name()
+    public async Task WhenAddingAResourceWithoutCodeOrName_ThenBothAreRejectedAsRequired()
     {
         var service = await CreateAsync();
 
@@ -71,7 +71,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task UpdateResource_toggles_active()
+    public async Task GivenAnActiveResource_WhenUpdatingItToInactive_ThenItIsStoredAsInactive()
     {
         var service = await CreateAsync();
         var p4 = (await service.GetResourcesAsync()).Single(r => r.Code == "P4");
@@ -83,7 +83,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Update_unknown_id_fails()
+    public async Task GivenAnUnknownId_WhenUpdatingAResourceOrAPerson_ThenBothFailWithNoLongerExists()
     {
         var service = await CreateAsync();
 
@@ -97,7 +97,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SetPersonActive_toggles_only_active()
+    public async Task GivenAnActivePerson_WhenDeactivating_ThenOnlyIsActiveChangesAndNameAndEmailStay()
     {
         var service = await CreateAsync();
         var dana = (await service.GetPeopleAsync()).Single(p => p.Name == "Dana");
@@ -111,7 +111,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task GetPeople_ordered_by_name()
+    public async Task WhenGettingThePeople_ThenTheyAreOrderedByName()
     {
         var service = await CreateAsync();
 

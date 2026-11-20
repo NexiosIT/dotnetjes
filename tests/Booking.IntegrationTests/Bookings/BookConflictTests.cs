@@ -10,7 +10,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     private static readonly string[] Everyone = ["Anna", "Ben", "Chris", "Dana", "Eli", "Fien"];
 
     [Fact]
-    public async Task Book_rejects_taken_resource()
+    public async Task GivenD2IsBookedByAnna_WhenBenBooksD2_ThenResourceTaken()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         Assert.True((await ctx.Service.BookAsync(ctx.Person("Anna"), ctx.Resource("D2"), ctx.Today)).Success);
@@ -21,7 +21,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_rejects_second_desk_same_day()
+    public async Task GivenBenHasADesk_WhenBenBooksASecondDeskThatDay_ThenAlreadyBookedThatType()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         Assert.True((await ctx.Service.BookAsync(ctx.Person("Ben"), ctx.Resource("D3"), ctx.Today)).Success);
@@ -32,7 +32,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_rejects_second_parking_same_day()
+    public async Task GivenBenHasAParkingSpot_WhenBenBooksASecondOneThatDay_ThenAlreadyBookedThatType()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         Assert.True((await ctx.Service.BookAsync(ctx.Person("Ben"), ctx.Resource("P1"), ctx.Today)).Success);
@@ -43,7 +43,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_same_resource_twice_by_same_person_is_resource_taken()
+    public async Task GivenAnnaBookedD2_WhenAnnaBooksD2Again_ThenResourceTaken()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         Assert.True((await ctx.Service.BookAsync(ctx.Person("Anna"), ctx.Resource("D2"), ctx.Today)).Success);
@@ -54,7 +54,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_allows_desk_and_parking_same_day()
+    public async Task GivenBenHasADesk_WhenBenBooksAParkingSpotThatDay_ThenBothSucceed()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -63,7 +63,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_allows_same_resource_on_other_day()
+    public async Task GivenAnnaBookedD2Today_WhenBenBooksD2Tomorrow_ThenItSucceeds()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -72,7 +72,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Concurrent_bookings_of_one_desk_give_one_winner()
+    public async Task GivenSixPeople_WhenAllBookDeskD1AtOnce_ThenOneWinsAndFiveGetResourceTaken()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -85,7 +85,7 @@ public sealed class BookConflictTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Concurrent_bookings_by_one_person_give_one_desk()
+    public async Task GivenAnna_WhenBookingSixDesksAtOnce_ThenOneSucceedsAndFiveGetAlreadyBookedThatType()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         string[] desks = ["D1", "D2", "D3", "D4", "D5", "D6"];

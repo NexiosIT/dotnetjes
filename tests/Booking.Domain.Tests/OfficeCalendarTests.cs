@@ -10,19 +10,19 @@ public sealed class OfficeCalendarTests
         new(new FakeTimeProvider(DateTimeOffset.Parse(utc)), Brussels, maxDaysAhead: 14);
 
     [Fact]
-    public void Today_is_computed_in_brussels() =>
+    public void GivenALateUTCTime_WhenAskingForToday_ThenTheDateIsComputedInBrussels() =>
         Assert.Equal(new DateOnly(2026, 11, 21), At("2026-11-20T23:30:00Z").Today);
 
     [Fact]
-    public void FirstBookableDay_is_today_on_weekday() =>
+    public void GivenAWeekday_WhenAskingForTheFirstBookableDay_ThenItIsToday() =>
         Assert.Equal(new DateOnly(2026, 11, 18), At("2026-11-18T08:00:00Z").FirstBookableDay);
 
     [Fact]
-    public void FirstBookableDay_skips_weekend() =>
+    public void GivenAWeekendDay_WhenAskingForTheFirstBookableDay_ThenItIsTheNextMonday() =>
         Assert.Equal(new DateOnly(2026, 11, 23), At("2026-11-21T10:00:00Z").FirstBookableDay);
 
     [Fact]
-    public void LastBookableDay_is_today_plus_max() =>
+    public void WhenAskingForTheLastBookableDay_ThenItIsTodayPlusTheMaximumDaysAhead() =>
         Assert.Equal(new DateOnly(2026, 12, 2), At("2026-11-18T08:00:00Z").LastBookableDay);
 
     [Theory]
@@ -31,11 +31,11 @@ public sealed class OfficeCalendarTests
     [InlineData("2026-11-21", false)] // Saturday
     [InlineData("2026-12-02", true)]  // today + 14
     [InlineData("2026-12-03", false)] // today + 15
-    public void IsBookable(string date, bool expected) =>
+    public void GivenADate_WhenCheckingIfItIsBookable_ThenOnlyWeekdaysWithinTheWindowAre(string date, bool expected) =>
         Assert.Equal(expected, At("2026-11-18T08:00:00Z").IsBookable(DateOnly.Parse(date)));
 
     [Fact]
-    public void Weekday_navigation_skips_weekend()
+    public void GivenAWeekend_WhenNavigatingToNextOrPreviousWeekday_ThenItIsSkipped()
     {
         var calendar = At("2026-11-18T08:00:00Z");
         Assert.Equal(new DateOnly(2026, 11, 23), calendar.NextWeekday(new DateOnly(2026, 11, 20)));

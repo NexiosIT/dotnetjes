@@ -8,7 +8,7 @@ namespace Booking.IntegrationTests.Data;
 public sealed class DatabaseTests(PostgresFixture postgres)
 {
     [Fact]
-    public async Task Migrations_apply_and_seed_runs_once()
+    public async Task WhenSeedingTwice_ThenTheResourcesExistOnceAndThereAreNoPeople()
     {
         var factory = await postgres.CreateDatabaseAsync();
 
@@ -28,7 +28,7 @@ public sealed class DatabaseTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Long_codes_names_and_emails_are_stored()
+    public async Task WhenSavingALongCodeNameAndEmail_ThenTheyAreStored()
     {
         var factory = await postgres.CreateDatabaseAsync();
         await using var db = await factory.CreateDbContextAsync();
@@ -40,7 +40,7 @@ public sealed class DatabaseTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Unique_indexes_exist_with_expected_names()
+    public async Task WhenInspectingTheDatabase_ThenTheUniqueIndexesExistWithTheExpectedNames()
     {
         var factory = await postgres.CreateDatabaseAsync();
         await using var db = await factory.CreateDbContextAsync();

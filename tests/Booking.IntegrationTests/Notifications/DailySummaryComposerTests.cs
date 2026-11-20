@@ -9,7 +9,7 @@ public sealed class DailySummaryComposerTests
     private static readonly PersonView Anna = new PersonView(1, "Anna", "anna@example.com", true);
 
     [Fact]
-    public void Compose_subject_names_the_day()
+    public void WhenComposingTheSummary_ThenTheSubjectNamesTheDayAndItIsSentToTheRecipient()
     {
         var email = DailySummaryComposer.Compose(Days.With(Friday), Anna);
 
@@ -18,7 +18,7 @@ public sealed class DailySummaryComposerTests
     }
 
     [Fact]
-    public void Compose_lists_people_and_spots()
+    public void GivenBookingsByAnnaAndBen_WhenComposingTheSummary_ThenItListsTheirNamesAndSpots()
     {
         var day = Days.With(Friday, ("D2", 1, "Anna"), ("P2", 1, "Anna"), ("D3", 2, "Ben"));
 
@@ -32,7 +32,7 @@ public sealed class DailySummaryComposerTests
     }
 
     [Fact]
-    public void Compose_counts_free()
+    public void GivenThreeBookedSpots_WhenComposingTheSummary_ThenItCountsTheFreeDesksAndParkingSpots()
     {
         var day = Days.With(Friday, ("D2", 1, "Anna"), ("P2", 1, "Anna"), ("D3", 2, "Ben"));
 
@@ -42,7 +42,7 @@ public sealed class DailySummaryComposerTests
     }
 
     [Fact]
-    public void Compose_empty_day()
+    public void GivenNoBookings_WhenComposingTheSummary_ThenItSaysNobodyHasBooked()
     {
         var body = DailySummaryComposer.Compose(Days.With(Friday), Anna).HtmlBody;
 
@@ -50,7 +50,7 @@ public sealed class DailySummaryComposerTests
     }
 
     [Fact]
-    public void Compose_encodes_names()
+    public void GivenANameWithAnAmpersand_WhenComposingTheSummary_ThenTheNameIsHtmlEncoded()
     {
         var day = Days.With(Friday, ("D1", 7, "Tom & Jerry"));
 

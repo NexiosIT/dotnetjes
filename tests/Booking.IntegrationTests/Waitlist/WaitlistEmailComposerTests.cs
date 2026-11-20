@@ -16,11 +16,11 @@ public class WaitlistEmailComposerTests
     private static readonly DateOnly Tuesday = new(2026, 11, 24);
 
     [Fact]
-    public void Subject_names_the_day() =>
+    public void WhenComposingTheWaitlistEmail_ThenTheSubjectNamesTheDay() =>
         Assert.Equal("A charger spot is free on Tue 24 Nov", WaitlistEmailComposer.Compose(Anna, Tuesday, P1, null).Subject);
 
     [Fact]
-    public void Body_names_spot_and_location()
+    public void WhenComposingTheWaitlistEmail_ThenTheBodyNamesTheSpotAndLocationAndTheNameIsHtmlEncoded()
     {
         var body = WaitlistEmailComposer.Compose(Anna, Tuesday, P1, null).HtmlBody;
 
@@ -32,7 +32,7 @@ public class WaitlistEmailComposerTests
     }
 
     [Fact]
-    public void Body_has_link_when_url_set() =>
+    public void GivenAUrlIsSet_WhenComposingTheWaitlistEmail_ThenTheBodyHasALink() =>
         Assert.Contains("href=\"https://booking.example.org\"",
             WaitlistEmailComposer.Compose(Anna, Tuesday, P1, "https://booking.example.org").HtmlBody);
 
@@ -40,10 +40,10 @@ public class WaitlistEmailComposerTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("  ")]
-    public void Body_has_no_link_when_url_empty(string? url) =>
+    public void GivenTheUrlIsNullOrBlank_WhenComposingTheWaitlistEmail_ThenTheBodyHasNoLink(string? url) =>
         Assert.DoesNotContain("href", WaitlistEmailComposer.Compose(Anna, Tuesday, P1, url).HtmlBody);
 
     [Fact]
-    public void To_is_recipient_email() =>
+    public void WhenComposingTheWaitlistEmail_ThenItIsAddressedToTheRecipient() =>
         Assert.Equal("anna@example.com", WaitlistEmailComposer.Compose(Anna, Tuesday, P1, null).To);
 }

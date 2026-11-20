@@ -6,7 +6,7 @@ namespace Booking.IntegrationTests.Bookings;
 public sealed class GetDayTests(PostgresFixture postgres)
 {
     [Fact]
-    public async Task GetDay_lists_active_resources_ordered_by_code()
+    public async Task GivenNoBookings_WhenGettingTheDay_ThenActiveDesksAndParkingAreListedFreeAndOrderedByCode()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -23,7 +23,7 @@ public sealed class GetDayTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task GetDay_shows_bookings_and_distinct_people_in_office()
+    public async Task GivenAnnaBookedADeskAndAParkingSpot_WhenGettingTheDay_ThenBookingsShowAndAnnaIsListedOnce()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "D2", ctx.Today);
@@ -40,7 +40,7 @@ public sealed class GetDayTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task GetDay_hides_inactive_free_resource_keeps_inactive_booked_one()
+    public async Task GivenInactiveDesksOneBookedAndOneFree_WhenGettingTheDay_ThenOnlyTheBookedOneIsShown()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Ben", "D3", ctx.Today);
@@ -54,7 +54,7 @@ public sealed class GetDayTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task GetDay_includes_parking_location_and_charger()
+    public async Task WhenGettingTheDay_ThenParkingSpotsShowLocationAndChargerAndDesksHaveNoLocation()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -70,7 +70,7 @@ public sealed class GetDayTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task GetDay_only_shows_bookings_for_that_date()
+    public async Task GivenABookingForTomorrow_WhenGettingToday_ThenItShowsNoBookingAndNobodyInTheOffice()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "D2", ctx.Today.AddDays(1));
@@ -82,7 +82,7 @@ public sealed class GetDayTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task GetDay_marks_inactive_slots()
+    public async Task GivenABookedSpotThatBecameInactive_WhenGettingTheDay_ThenItIsMarkedInactiveAndActiveOnesAreNot()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P1", ctx.Today);

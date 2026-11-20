@@ -25,32 +25,32 @@ public sealed class SlotFilterTests
     private static string[] Codes(IEnumerable<ResourceSlot> slots) => slots.Select(s => s.Code).ToArray();
 
     [Fact]
-    public void Hides_spots_taken_by_someone_else_keeps_own()
+    public void GivenSpotsTakenByOthers_WhenFiltering_ThenTheyAreHiddenAndOwnSpotsAreKept()
     {
         Assert.Equal(["P1", "P3", "P4", "P5"], Codes(SlotFilter.Apply(Spots, Anna)));
     }
 
     [Fact]
-    public void Nobody_picked_sees_only_free_spots()
+    public void GivenNobodyIsPicked_WhenFiltering_ThenOnlyFreeSpotsAreShown()
     {
         Assert.Equal(["P1", "P4", "P5"], Codes(SlotFilter.Apply(Spots, currentPersonId: null)));
     }
 
     [Fact]
-    public void Filters_on_location()
+    public void WhenFilteringOnALocation_ThenOnlySpotsAtThatLocationAreShown()
     {
         Assert.Equal(["P1"], Codes(SlotFilter.Apply(Spots, Anna, ParkingLocation.Basement)));
         Assert.Equal(["P3"], Codes(SlotFilter.Apply(Spots, Anna, ParkingLocation.Outside)));
     }
 
     [Fact]
-    public void Filters_on_charger()
+    public void WhenFilteringOnChargerOnly_ThenOnlySpotsWithAChargerAreShown()
     {
         Assert.Equal(["P1", "P3"], Codes(SlotFilter.Apply(Spots, Anna, chargerOnly: true)));
     }
 
     [Fact]
-    public void Combines_location_and_charger()
+    public void WhenFilteringOnLocationAndCharger_ThenOnlySpotsMatchingBothAreShown()
     {
         Assert.Equal(["P3"], Codes(SlotFilter.Apply(Spots, Anna, ParkingLocation.Outside, chargerOnly: true)));
         Assert.Empty(SlotFilter.Apply(Spots, Anna, ParkingLocation.BehindTheBuilding, chargerOnly: true));

@@ -22,7 +22,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
         (await service.GetResourcesAsync()).Single(r => r.Code == code);
 
     [Fact]
-    public async Task Seed_gives_parking_spots_a_location_and_chargers()
+    public async Task GivenASeededDatabase_WhenReadingResources_ThenParkingSpotsHaveLocationAndChargerAndDesksHaveNone()
     {
         var (service, _) = await CreateAsync();
 
@@ -35,7 +35,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SetParkingDetails_stores_location_and_charger()
+    public async Task GivenParkingSpotP2_WhenSettingLocationAndCharger_ThenBothAreStored()
     {
         var (service, _) = await CreateAsync();
         var p2 = await Get(service, "P2");
@@ -46,7 +46,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SetParkingDetails_can_clear_location()
+    public async Task GivenParkingSpotP1_WhenSettingNoLocationAndNoCharger_ThenBothAreCleared()
     {
         var (service, _) = await CreateAsync();
         var p1 = await Get(service, "P1");
@@ -57,7 +57,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SetParkingDetails_keeps_code_name_and_active()
+    public async Task GivenAnInactiveRenamedSpot_WhenSettingParkingDetails_ThenNameAndInactiveStateAreKept()
     {
         var (service, _) = await CreateAsync();
         var p4 = await Get(service, "P4");
@@ -73,7 +73,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
     [Theory]
     [InlineData(ParkingLocation.Outside, false)]
     [InlineData(null, true)]
-    public async Task SetParkingDetails_rejects_desk(ParkingLocation? location, bool hasCharger)
+    public async Task GivenADesk_WhenSettingParkingDetails_ThenItIsRejectedBecauseOnlyParkingHasThem(ParkingLocation? location, bool hasCharger)
     {
         var (service, _) = await CreateAsync();
         var d1 = await Get(service, "D1");
@@ -85,7 +85,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task SetParkingDetails_unknown_id_fails()
+    public async Task GivenAnUnknownId_WhenSettingParkingDetails_ThenItFailsWithNoLongerExists()
     {
         var (service, _) = await CreateAsync();
 
@@ -96,7 +96,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public void Every_location_has_a_label()
+    public void WhenListingParkingLocations_ThenEachHasALabelAndAllLocationsAreListed()
     {
         foreach (var location in ParkingLocations.All)
         {

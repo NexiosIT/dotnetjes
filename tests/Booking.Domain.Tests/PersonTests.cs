@@ -3,7 +3,7 @@ namespace Booking.Domain.Tests;
 public class PersonTests
 {
     [Fact]
-    public void FromLogin_trims_and_stores_blank_email_as_null()
+    public void WhenCreatingAPersonFromALogin_ThenValuesAreTrimmedAndABlankEmailBecomesNull()
     {
         var person = Person.FromLogin("kc-1", " Anna ", "  ");
 
@@ -15,7 +15,7 @@ public class PersonTests
     }
 
     [Fact]
-    public void RefreshProfile_updates_name_and_email_but_not_active()
+    public void GivenAnInactivePerson_WhenRefreshingProfile_ThenNameAndEmailChangeAndActiveStays()
     {
         var person = Fixtures.Anna();
         person.SetActive(false);

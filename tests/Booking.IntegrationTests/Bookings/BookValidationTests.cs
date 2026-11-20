@@ -8,7 +8,7 @@ namespace Booking.IntegrationTests.Bookings;
 public sealed class BookValidationTests(PostgresFixture postgres)
 {
     [Fact]
-    public async Task Book_succeeds_and_stores_type_and_utc_timestamp()
+    public async Task WhenAnnaBooksParkingSpotP1_ThenItSucceedsAndStoresTheTypeAndAUTCTimestamp()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -30,7 +30,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_succeeds_on_last_bookable_day()
+    public async Task WhenBookingOnTheLastBookableDay_ThenItSucceeds()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -42,7 +42,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     [Theory]
     [InlineData("2026-11-17")] // yesterday
     [InlineData("2026-12-03")] // today + 15
-    public async Task Book_rejects_out_of_range(string date)
+    public async Task WhenBookingYesterdayOrBeyondTheLastBookableDay_ThenOutOfRange(string date)
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -52,7 +52,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_rejects_weekend()
+    public async Task WhenBookingOnAWeekend_ThenWeekend()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -62,7 +62,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_rejects_inactive_person()
+    public async Task GivenAnInactivePerson_WhenBooking_ThenPersonInactive()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.DeactivatePerson("Ben");
@@ -73,7 +73,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_rejects_inactive_resource()
+    public async Task GivenAnInactiveResource_WhenBookingIt_ThenResourceInactive()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.DeactivateResource("D5");
@@ -84,7 +84,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_rejects_unknown_ids()
+    public async Task WhenBookingWithAnUnknownPersonOrResource_ThenNotFound()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -93,7 +93,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Book_checks_date_before_active_state()
+    public async Task GivenAnInactivePersonAndResource_WhenBooking_ThenTheDateIsCheckedBeforeTheActiveState()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.DeactivatePerson("Ben");
@@ -105,7 +105,7 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Rejected_booking_stores_nothing()
+    public async Task GivenAnInactiveResource_WhenBookingIt_ThenNoBookingIsStored()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.DeactivateResource("D5");

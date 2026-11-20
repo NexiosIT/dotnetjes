@@ -6,7 +6,7 @@ public class WaitlistEntryTests
         WaitlistEntry.Join(person, date, Fixtures.Calendar, Fixtures.Now);
 
     [Fact]
-    public void Join_creates_an_entry_for_that_day()
+    public void GivenABookableDay_WhenJoiningTheWaitlist_ThenAnEntryForThatDayIsCreated()
     {
         var result = Join(Fixtures.Anna(), Fixtures.Today);
 
@@ -16,7 +16,7 @@ public class WaitlistEntryTests
     }
 
     [Fact]
-    public void Join_checks_range_weekend_active_then_email()
+    public void GivenAnInactivePersonWithoutEmail_WhenJoining_ThenRangeWeekendActiveEmailAreCheckedInOrder()
     {
         var anna = Fixtures.Anna(email: null);
         anna.SetActive(false);

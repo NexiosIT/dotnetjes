@@ -15,7 +15,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_moves_parking_booking()
+    public async Task GivenAnnaHasP2_WhenSwitchingToP1_ThenAnnaHoldsP1AndP2IsFree()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P2", ctx.Today);
@@ -29,7 +29,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_moves_desk_booking()
+    public async Task GivenAnnaHasD1_WhenSwitchingToD2_ThenAnnaHoldsD2AndD1IsFree()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "D1", ctx.Today);
@@ -42,7 +42,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_onto_own_spot_is_noop()
+    public async Task GivenAnnaHasP2_WhenSwitchingToP2_ThenTheBookingIsUnchangedAndNobodyIsNotified()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var id = await ctx.InsertBooking("Anna", "P2", ctx.Today);
@@ -54,7 +54,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_without_existing_booking_is_NotFound()
+    public async Task GivenAnnaHasNoParkingBooking_WhenSwitchingToP1_ThenNotFoundAndP1StaysFree()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "D1", ctx.Today);
@@ -66,7 +66,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_to_taken_spot_keeps_old_booking()
+    public async Task GivenTheTargetSpotIsTaken_WhenSwitching_ThenTheOldBookingIsKept()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Ben", "P1", ctx.Today);
@@ -80,7 +80,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Concurrent_switches_onto_same_spot_one_wins_loser_keeps_old()
+    public async Task GivenAnnaAndBenHaveSpots_WhenBothSwitchToP1AtOnce_ThenOneWinsAndTheLoserKeepsTheOldSpot()
     {
         for (var round = 0; round < 5; round++)
         {
@@ -102,7 +102,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_validation_matches_book()
+    public async Task GivenAnnaHasP2_WhenSwitchingWithInvalidInput_ThenTheSameErrorsAsBookingAreReturned()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P2", ctx.Today);
@@ -125,7 +125,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_onto_charger_removes_waitlist_entry()
+    public async Task GivenAnnaIsOnTheWaitlist_WhenSwitchingOntoChargerSpotP1_ThenHerWaitlistEntryIsRemoved()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P2", ctx.Today);
@@ -142,7 +142,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_away_from_charger_notifies()
+    public async Task GivenAnnaHasChargerSpotP1_WhenSwitchingToP2_ThenTheFreedChargerSpotIsNotified()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P1", ctx.Today);
@@ -153,7 +153,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Switch_between_ordinary_spots_does_not_notify()
+    public async Task GivenAnnaHasOrdinarySpotP2_WhenSwitchingToP4_ThenNobodyIsNotified()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P2", ctx.Today);
@@ -164,7 +164,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Failed_switch_away_from_charger_does_not_notify()
+    public async Task GivenAnnaHasP1AndBenHasP2_WhenAnnaSwitchesToP2_ThenNobodyIsNotified()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.InsertBooking("Anna", "P1", ctx.Today);
@@ -180,7 +180,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     /// on the old booking until it commits; the switch must then answer NotFound instead of crashing the page.
     /// </summary>
     [Fact]
-    public async Task Old_booking_removed_mid_switch_is_NotFound_not_a_crash()
+    public async Task GivenTheOldBookingIsRemovedInAnotherTab_WhenSwitching_ThenNotFound()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var old = await ctx.InsertBooking("Anna", "P2", ctx.Today);

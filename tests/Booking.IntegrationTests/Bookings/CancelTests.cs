@@ -8,7 +8,7 @@ namespace Booking.IntegrationTests.Bookings;
 public sealed class CancelTests(PostgresFixture postgres)
 {
     [Fact]
-    public async Task Cancel_removes_own_booking()
+    public async Task GivenAnnaBookedD2_WhenAnnaCancels_ThenItSucceedsAndD2IsFreeAndNobodyIsInTheOffice()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Anna"), ctx.Resource("D2"), ctx.Today);
@@ -23,7 +23,7 @@ public sealed class CancelTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancelled_slot_can_be_booked_again()
+    public async Task GivenAnnaCancelledD2_WhenBenBooksD2_ThenItSucceeds()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Anna"), ctx.Resource("D2"), ctx.Today);
@@ -35,7 +35,7 @@ public sealed class CancelTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancel_rejects_other_persons()
+    public async Task GivenAnnaBookedD2_WhenBenCancelsIt_ThenNotYourBookingAndTheBookingRemains()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Anna"), ctx.Resource("D2"), ctx.Today);
@@ -47,7 +47,7 @@ public sealed class CancelTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancel_unknown_booking()
+    public async Task WhenCancellingAnUnknownBooking_ThenNotFound()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
 
@@ -57,7 +57,7 @@ public sealed class CancelTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancel_twice_second_is_not_found()
+    public async Task GivenAnnaCancelledHerBooking_WhenAnnaCancelsItAgain_ThenNotFound()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var booked = await ctx.Service.BookAsync(ctx.Person("Anna"), ctx.Resource("D2"), ctx.Today);
@@ -69,7 +69,7 @@ public sealed class CancelTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancel_rejects_past_booking()
+    public async Task GivenABookingInThePast_WhenAnnaCancelsIt_ThenOutOfRangeAndTheBookingRemains()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var bookingId = await ctx.InsertBooking("Anna", "D2", new DateOnly(2026, 11, 17));
@@ -81,7 +81,7 @@ public sealed class CancelTests(PostgresFixture postgres)
     }
 
     [Fact]
-    public async Task Cancel_other_persons_past_booking_is_not_yours()
+    public async Task GivenAnnasBookingInThePast_WhenBenCancelsIt_ThenNotYourBooking()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
         var bookingId = await ctx.InsertBooking("Anna", "D2", new DateOnly(2026, 11, 17));

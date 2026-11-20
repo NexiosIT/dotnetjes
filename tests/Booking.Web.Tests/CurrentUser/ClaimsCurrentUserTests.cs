@@ -27,7 +27,7 @@ public class ClaimsCurrentUserTests
         new(new ClaimsIdentity(claims.Select(c => new Claim(c.Type, c.Value)), "test"));
 
     [Fact]
-    public async Task Returns_person_id_from_directory()
+    public async Task GivenASignedInUser_WhenGettingThePersonId_ThenTheDirectoryIdIsReturnedAndSignedInOnce()
     {
         var directory = new RecordingDirectory();
         var currentUser = new ClaimsCurrentUser(new FixedAuth(LoggedIn(("sub", "abc"), ("name", "Anna"))), directory);
@@ -37,7 +37,7 @@ public class ClaimsCurrentUserTests
     }
 
     [Fact]
-    public async Task Calls_directory_once_per_circuit()
+    public async Task GivenASignedInUser_WhenGettingThePersonIdTwice_ThenTheDirectoryIsCalledOnce()
     {
         var directory = new RecordingDirectory();
         var currentUser = new ClaimsCurrentUser(new FixedAuth(LoggedIn(("sub", "abc"), ("name", "Anna"))), directory);
@@ -49,7 +49,7 @@ public class ClaimsCurrentUserTests
     }
 
     [Fact]
-    public async Task Returns_null_without_sub()
+    public async Task GivenNoSubClaim_WhenGettingThePersonId_ThenNullIsReturnedAndTheDirectoryIsNotCalled()
     {
         var directory = new RecordingDirectory();
         var currentUser = new ClaimsCurrentUser(new FixedAuth(new ClaimsPrincipal(new ClaimsIdentity())), directory);

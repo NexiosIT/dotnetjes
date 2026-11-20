@@ -13,11 +13,11 @@ public class AdminPagesTests
             .Where(t => t.GetCustomAttributes<RouteAttribute>().Any(r => r.Template.StartsWith("/admin", StringComparison.OrdinalIgnoreCase))));
 
     [Fact]
-    public void There_are_admin_pages() =>
+    public void WhenLookingForAdminPages_ThenAtLeastThreeAreFound() =>
         Assert.True(AdminPages().Count >= 3);
 
     [Theory]
     [MemberData(nameof(AdminPages))]
-    public void Admin_pages_require_admin_policy(Type page) =>
+    public void GivenAnAdminPage_WhenCheckingItsAuthorization_ThenItRequiresTheAdminPolicy(Type page) =>
         Assert.Equal(AdminAccess.Policy, page.GetCustomAttribute<AuthorizeAttribute>()?.Policy);
 }

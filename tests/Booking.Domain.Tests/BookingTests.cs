@@ -8,7 +8,7 @@ public class BookingTests
         BookingEntity.Book(person, resource, date, Fixtures.Calendar, Fixtures.Now);
 
     [Fact]
-    public void Book_creates_a_booking_for_that_day()
+    public void GivenABookableDay_WhenBookingAResource_ThenABookingForThatDayIsCreated()
     {
         var result = Book(Fixtures.Anna(), Fixtures.ChargerSpot(), Fixtures.Today);
 
@@ -21,15 +21,15 @@ public class BookingTests
     [Theory]
     [InlineData(-1)]
     [InlineData(15)]
-    public void Book_outside_the_window_is_OutOfRange(int days) =>
+    public void GivenADayOutsideTheBookingWindow_WhenBooking_ThenTheErrorIsOutOfRange(int days) =>
         Assert.Equal(BookingError.OutOfRange, Book(Fixtures.Anna(), Fixtures.Desk(), Fixtures.Today.AddDays(days)).Error);
 
     [Fact]
-    public void Book_on_a_weekend_is_refused() =>
+    public void GivenAWeekendDay_WhenBooking_ThenTheErrorIsWeekend() =>
         Assert.Equal(BookingError.Weekend, Book(Fixtures.Anna(), Fixtures.Desk(), Fixtures.Saturday).Error);
 
     [Fact]
-    public void Book_checks_person_before_resource()
+    public void GivenBothInactive_WhenBooking_ThenPersonInactiveComesBeforeResourceInactive()
     {
         var anna = Fixtures.Anna();
         anna.SetActive(false);
@@ -42,11 +42,11 @@ public class BookingTests
     }
 
     [Fact]
-    public void Range_is_checked_before_weekend_and_people() =>
+    public void GivenAWeekendDayOutOfRange_WhenBooking_ThenOutOfRangeIsReportedFirst() =>
         Assert.Equal(BookingError.OutOfRange, Book(Fixtures.Anna(), Fixtures.Desk(), new DateOnly(2026, 12, 5)).Error);
 
     [Fact]
-    public void Only_the_owner_can_cancel_and_not_in_the_past()
+    public void GivenABooking_WhenCancelling_ThenOnlyTheOwnerMayAndNotAfterTheDayHasPassed()
     {
         var booking = Book(Fixtures.Anna(), Fixtures.Desk(), Fixtures.Today.AddDays(1)).Value!;
 
