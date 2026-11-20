@@ -29,6 +29,19 @@ public sealed class DatabaseTests(PostgresFixture postgres)
     }
 
     [Fact]
+    public async Task Long_codes_names_and_emails_are_stored()
+    {
+        // No column length limits: admin input must never fail at the database with "value too long".
+        var factory = await postgres.CreateDatabaseAsync();
+        await using var db = await factory.CreateDbContextAsync();
+
+        db.Resources.Add(new Resource { Code = new string('X', 30), Name = new string('N', 150), Type = ResourceType.Desk });
+        db.People.Add(new Person { Name = new string('N', 150), Email = new string('e', 250) + "@example.com" });
+
+        await db.SaveChangesAsync();
+    }
+
+    [Fact]
     public async Task Unique_indexes_exist_with_expected_names()
     {
         var factory = await postgres.CreateDatabaseAsync();

@@ -15,16 +15,10 @@ public class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Person>(person =>
-        {
-            person.Property(p => p.Name).HasMaxLength(100);
-            person.Property(p => p.Email).HasMaxLength(200);
-        });
-
+        // Text columns have no length limit on purpose: a too-long value would fail as a
+        // DbUpdateException, which admin pages don't catch (they only catch AdminValidationException).
         modelBuilder.Entity<Resource>(resource =>
         {
-            resource.Property(r => r.Code).HasMaxLength(20);
-            resource.Property(r => r.Name).HasMaxLength(100);
             resource.Property(r => r.Type).HasConversion<string>().HasMaxLength(20);
             resource.HasIndex(r => r.Code).IsUnique().HasDatabaseName(ResourceCodeIndex);
         });

@@ -1,5 +1,4 @@
 using Booking.Core.Services;
-using Booking.Web.Stubs;
 
 namespace Booking.Web.Setup;
 
@@ -9,7 +8,8 @@ public static class BookingFeature
     public static IServiceCollection AddBookingFeature(this IServiceCollection services)
     {
         // A4 swaps this for the real BookingService (scoped).
-        services.AddSingleton<IBookingService, StubBookingService>();
+        // Fully qualified (no using) so deleting the Stubs folder never breaks another person's Setup file.
+        services.AddSingleton<IBookingService, Stubs.StubBookingService>();
         return services;
     }
 }

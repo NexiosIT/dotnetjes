@@ -51,7 +51,7 @@ public sealed class StubAdminService : IAdminService
         }
     }
 
-    public Task<Person> AddPersonAsync(string name, string email, CancellationToken ct = default)
+    public Task<Person> AddPersonAsync(string name, string? email, CancellationToken ct = default)
     {
         lock (_lock)
         {
@@ -61,7 +61,7 @@ public sealed class StubAdminService : IAdminService
         }
     }
 
-    public Task UpdatePersonAsync(int id, string name, string email, bool isActive, CancellationToken ct = default)
+    public Task UpdatePersonAsync(int id, string name, string? email, bool isActive, CancellationToken ct = default)
     {
         lock (_lock)
         {

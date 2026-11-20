@@ -22,7 +22,8 @@ services:
       POSTGRES_USER: booking
       POSTGRES_PASSWORD: booking
     ports:
-      - "5432:5432"
+      # Already running Postgres locally? Start with DB_PORT=5433 (and point appsettings at it for dotnet run).
+      - "${DB_PORT:-5432}:5432"
     volumes:
       # Postgres 18+ keeps its data in /var/lib/postgresql/18/docker, so mount the parent
       # (mounting .../data like older versions makes the container refuse to start).

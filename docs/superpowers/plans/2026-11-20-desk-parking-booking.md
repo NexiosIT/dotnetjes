@@ -356,6 +356,7 @@ AddResource_requires_code_and_name()   // "" code → "Code is required."; "" na
 UpdateResource_toggles_active()        // UpdateResourceAsync(P4, "P4", "Parking 4", false) → GetResourcesAsync: P4.IsActive == false
 Update_unknown_id_fails()              // id 9999 → "That item no longer exists."
 AddPerson_validates_email()            // ("Gert", "gert") → "Email must contain '@'."; ("Gert", "") → stored Email == null
+UpdatePerson_accepts_null_email()      // UpdatePersonAsync(<Dana id>, "Dana", null, true) → stored Email == null, no exception
 GetPeople_ordered_by_name()            // first == "Anna", last == "Fien"
 ```
 

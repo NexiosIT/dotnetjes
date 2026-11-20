@@ -131,8 +131,8 @@ public interface IAdminService
     Task<Resource> AddResourceAsync(string code, string name, ResourceType type, CancellationToken ct = default);
     Task UpdateResourceAsync(int id, string code, string name, bool isActive, CancellationToken ct = default);
     Task<IReadOnlyList<Person>> GetPeopleAsync(CancellationToken ct = default);
-    Task<Person> AddPersonAsync(string name, string email, CancellationToken ct = default);
-    Task UpdatePersonAsync(int id, string name, string email, bool isActive, CancellationToken ct = default);
+    Task<Person> AddPersonAsync(string name, string? email, CancellationToken ct = default);
+    Task UpdatePersonAsync(int id, string name, string? email, bool isActive, CancellationToken ct = default);
 }
 
 public sealed class AdminValidationException(string message) : Exception(message);
