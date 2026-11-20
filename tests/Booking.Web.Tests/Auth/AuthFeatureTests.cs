@@ -111,6 +111,19 @@ public class AuthFeatureTests
     }
 
     [Fact]
+    public async Task Token_validated_ignores_role_claims_from_the_id_token()
+    {
+        // A future Keycloak mapper could put a "role" claim in the ID token; only this client's roles may count.
+        var context = TokenValidated(TestTokens.WithPayload("""{"resource_access":{"app":{"roles":["viewer"]}}}"""));
+        ((ClaimsIdentity)context.Principal!.Identity!).AddClaim(new Claim(AdminAccess.RoleClaimType, "Admin"));
+
+        await AuthFeature.AddRolesAsync(context);
+
+        Assert.False(context.Principal.IsInRole("Admin"));
+        Assert.True(context.Principal.IsInRole("viewer"));
+    }
+
+    [Fact]
     public async Task Token_validated_without_access_token_adds_no_roles()
     {
         var context = TokenValidated(null);

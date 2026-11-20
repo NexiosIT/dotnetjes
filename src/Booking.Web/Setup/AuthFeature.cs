@@ -91,11 +91,17 @@ public static class AuthFeature
     /// <summary>
     /// Keycloak puts client roles only in the access token, not in the ID token the login identity is built from.
     /// Copy this client's roles onto the identity so they end up in the login cookie. Read once per login.
+    /// Any role claim already on the identity (e.g. from a future ID-token mapper) is dropped: only this client's roles count.
     /// </summary>
     public static Task AddRolesAsync(TokenValidatedContext context)
     {
         if (context.Principal?.Identity is ClaimsIdentity identity)
         {
+            foreach (var existing in identity.FindAll(identity.RoleClaimType).ToList())
+            {
+                identity.RemoveClaim(existing);
+            }
+
             foreach (var role in KeycloakRoles.ClientRoles(context.TokenEndpointResponse?.AccessToken, context.Options.ClientId ?? ""))
             {
                 identity.AddClaim(new Claim(identity.RoleClaimType, role));
