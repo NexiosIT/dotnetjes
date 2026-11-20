@@ -10,8 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Shared infrastructure. Don't change this file after the skeleton:
-// register your own services in Setup/*Feature.cs instead.
+// Shared infrastructure. Register feature services in Setup/*Feature.cs rather than here.
 builder.Services.AddDbContextFactory<BookingDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Booking")));
 builder.Services.AddSingleton(TimeProvider.System);
@@ -36,6 +35,7 @@ builder.Services.AddSingleton<IOfficeCalendar>(sp => new OfficeCalendar(
 builder.Services.AddBookingFeature();                    // Person A
 builder.Services.AddDayViewFeature();                    // Person B
 builder.Services.AddAdminFeature(builder.Configuration); // Person C
+builder.Services.AddAuthFeature(builder.Configuration);  // Keycloak login
 
 var app = builder.Build();
 
@@ -51,9 +51,12 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapStaticAssets();
+app.MapStaticAssets().AllowAnonymous();
+app.MapAuthEndpoints();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

@@ -7,6 +7,10 @@ services:
       ConnectionStrings__Booking: "Host=db;Port=5432;Database=booking;Username=booking;Password=booking"
       Smtp__Host: mailpit
       DataProtection__KeysPath: /keys
+      # From .env (copy .env.example). Never commit the secret.
+      Keycloak__Authority: ${KEYCLOAK_AUTHORITY:-}
+      Keycloak__ClientId: ${KEYCLOAK_CLIENT_ID:-}
+      Keycloak__ClientSecret: ${KEYCLOAK_CLIENT_SECRET:-}
     volumes:
       - dpkeys:/keys
     depends_on:
