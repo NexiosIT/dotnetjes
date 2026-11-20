@@ -38,7 +38,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     {
         var service = await CreateAsync();
 
-        var ex = await Assert.ThrowsAsync<AdminValidationException>(
+        var ex = await Assert.ThrowsAsync<DomainValidationException>(
             () => service.AddResourceAsync(" d1 ", "x", ResourceType.Desk));
 
         Assert.Equal("A resource with code D1 already exists.", ex.Message);
@@ -50,7 +50,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
         var service = await CreateAsync();
         var d2 = (await service.GetResourcesAsync()).Single(r => r.Code == "D2");
 
-        var ex = await Assert.ThrowsAsync<AdminValidationException>(
+        var ex = await Assert.ThrowsAsync<DomainValidationException>(
             () => service.UpdateResourceAsync(d2.Id, "d1", "Desk 2", true));
 
         Assert.Equal("A resource with code D1 already exists.", ex.Message);
@@ -61,9 +61,9 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     {
         var service = await CreateAsync();
 
-        var noCode = await Assert.ThrowsAsync<AdminValidationException>(
+        var noCode = await Assert.ThrowsAsync<DomainValidationException>(
             () => service.AddResourceAsync("", "Desk 9", ResourceType.Desk));
-        var noName = await Assert.ThrowsAsync<AdminValidationException>(
+        var noName = await Assert.ThrowsAsync<DomainValidationException>(
             () => service.AddResourceAsync("D9", "", ResourceType.Desk));
 
         Assert.Equal("Code is required.", noCode.Message);
@@ -87,9 +87,9 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
     {
         var service = await CreateAsync();
 
-        var resource = await Assert.ThrowsAsync<AdminValidationException>(
+        var resource = await Assert.ThrowsAsync<DomainValidationException>(
             () => service.UpdateResourceAsync(9999, "X1", "X", true));
-        var person = await Assert.ThrowsAsync<AdminValidationException>(
+        var person = await Assert.ThrowsAsync<DomainValidationException>(
             () => service.SetPersonActiveAsync(9999, true));
 
         Assert.Equal("That item no longer exists.", resource.Message);

@@ -17,7 +17,7 @@ public static class SeedData
 
         for (var i = 1; i <= 8; i++)
         {
-            db.Resources.Add(new Resource { Code = $"D{i}", Name = $"Desk {i}", Type = ResourceType.Desk });
+            db.Resources.Add(Resource.Create($"D{i}", $"Desk {i}", ResourceType.Desk));
         }
         (ParkingLocation Location, bool HasCharger)[] parking =
         [
@@ -29,11 +29,9 @@ public static class SeedData
         for (var i = 1; i <= parking.Length; i++)
         {
             var (location, hasCharger) = parking[i - 1];
-            db.Resources.Add(new Resource
-            {
-                Code = $"P{i}", Name = $"Parking {i}", Type = ResourceType.Parking,
-                Location = location, HasCharger = hasCharger
-            });
+            var spot = Resource.Create($"P{i}", $"Parking {i}", ResourceType.Parking);
+            spot.SetParkingDetails(location, hasCharger);
+            db.Resources.Add(spot);
         }
 
         await db.SaveChangesAsync(ct);

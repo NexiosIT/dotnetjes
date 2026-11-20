@@ -33,8 +33,8 @@ public sealed class DatabaseTests(PostgresFixture postgres)
         var factory = await postgres.CreateDatabaseAsync();
         await using var db = await factory.CreateDbContextAsync();
 
-        db.Resources.Add(new Resource { Code = new string('X', 30), Name = new string('N', 150), Type = ResourceType.Desk });
-        db.People.Add(new Person { Name = new string('N', 150), Email = new string('e', 250) + "@example.com" });
+        db.Resources.Add(Resource.Create(new string('X', 30), new string('N', 150), ResourceType.Desk));
+        db.People.Add(Person.FromLogin("kc-long", new string('N', 150), new string('e', 250) + "@example.com"));
 
         await db.SaveChangesAsync();
     }

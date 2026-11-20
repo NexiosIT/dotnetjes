@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Booking.Core.Tests/Booking.Core.Tests.csproj" />
+    <Project Path="tests/Booking.Domain.Tests/Booking.Domain.Tests.csproj" />
     <Project Path="tests/Booking.Web.Tests/Booking.Web.Tests.csproj" />
   </Folder>
 </Solution>

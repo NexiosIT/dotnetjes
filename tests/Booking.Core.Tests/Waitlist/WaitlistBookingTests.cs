@@ -12,7 +12,7 @@ public sealed class WaitlistBookingTests(PostgresFixture postgres)
     private static async Task OnWaitlist(BookingTestContext ctx, string name, DateOnly date)
     {
         await using var db = await ctx.DbFactory.CreateDbContextAsync();
-        db.Waitlist.Add(new WaitlistEntry { PersonId = ctx.Person(name), Date = date, CreatedAt = BookingTestContext.Now.UtcDateTime });
+        db.Waitlist.Add(WaitlistEntry.Reconstitute(ctx.Person(name), date, BookingTestContext.Now.UtcDateTime));
         await db.SaveChangesAsync();
     }
 

@@ -2,7 +2,7 @@
 namespace Booking.Core.Admin;
 
 /// <summary>
-/// Invalid input throws <see cref="AdminValidationException"/> with a message fit to show the user.
+/// Invalid input throws <see cref="DomainValidationException"/> with a message fit to show the user.
 /// People are created from Keycloak on first login (see <c>IPersonDirectory</c>); admins can only activate or deactivate them.
 /// </summary>
 public interface IAdminService

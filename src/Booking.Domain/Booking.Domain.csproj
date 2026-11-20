@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Booking.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Booking.Domain" />
     <Using Include="Booking.Domain.Bookings" />
     <Using Include="Booking.Domain.Calendar" />
     <Using Include="Booking.Domain.People" />

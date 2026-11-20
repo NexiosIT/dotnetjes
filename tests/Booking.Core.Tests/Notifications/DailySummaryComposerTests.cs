@@ -5,7 +5,7 @@ namespace Booking.Core.Tests.Notifications;
 public sealed class DailySummaryComposerTests
 {
     private static readonly DateOnly Friday = new(2026, 11, 20);
-    private static readonly Person Anna = new() { Id = 1, Name = "Anna", Email = "anna@example.com" };
+    private static readonly Person Anna = Person.Reconstitute(1, "Anna", "anna@example.com");
 
     [Fact]
     public void Compose_subject_names_the_day()

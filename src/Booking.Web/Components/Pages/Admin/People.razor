@@ -61,7 +61,7 @@ else
             await change();
             error = null;
         }
-        catch (AdminValidationException ex)
+        catch (DomainValidationException ex)
         {
             error = ex.Message;
         }

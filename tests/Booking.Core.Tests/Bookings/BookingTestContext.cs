@@ -77,14 +77,7 @@ public sealed class BookingTestContext
     {
         await using var db = await DbFactory.CreateDbContextAsync();
         var resource = await db.Resources.SingleAsync(r => r.Code == resourceCode);
-        var booking = new BookingEntity
-        {
-            PersonId = Person(personName),
-            ResourceId = resource.Id,
-            ResourceType = resource.Type,
-            Date = date,
-            CreatedAt = Now.UtcDateTime
-        };
+        var booking = BookingEntity.Reconstitute(Person(personName), resource.Id, resource.Type, date, Now.UtcDateTime);
         db.Bookings.Add(booking);
         await db.SaveChangesAsync();
         return booking.Id;

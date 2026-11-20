@@ -19,21 +19,10 @@ public sealed class WaitlistService(
         {
             return WaitlistResult.Fail(WaitlistError.NotFound);
         }
-        if (date < calendar.Today || date > calendar.LastBookableDay)
+        var joined = WaitlistEntry.Join(person, date, calendar, time.GetUtcNow().UtcDateTime);
+        if (joined.Error is { } refused)
         {
-            return WaitlistResult.Fail(WaitlistError.OutOfRange);
-        }
-        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
-        {
-            return WaitlistResult.Fail(WaitlistError.Weekend);
-        }
-        if (!person.IsActive)
-        {
-            return WaitlistResult.Fail(WaitlistError.PersonInactive);
-        }
-        if (string.IsNullOrWhiteSpace(person.Email))
-        {
-            return WaitlistResult.Fail(WaitlistError.NoEmail);
+            return WaitlistResult.Fail(refused);
         }
         if (await db.Bookings.AnyAsync(b => b.PersonId == personId && b.Date == date && b.Resource.HasCharger && b.Resource.Type == ResourceType.Parking, ct))
         {
@@ -49,7 +38,7 @@ public sealed class WaitlistService(
             return WaitlistResult.Ok();
         }
 
-        db.Waitlist.Add(new WaitlistEntry { PersonId = personId, Date = date, CreatedAt = time.GetUtcNow().UtcDateTime });
+        db.Waitlist.Add(joined.Value!);
         try
         {
             await db.SaveChangesAsync(ct);

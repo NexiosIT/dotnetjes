@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Time.Testing;
 
-namespace Booking.Core.Tests.Calendar;
+namespace Booking.Domain.Tests;
 
 public sealed class OfficeCalendarTests
 {

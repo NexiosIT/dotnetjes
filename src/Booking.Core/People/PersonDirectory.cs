@@ -6,12 +6,9 @@ namespace Booking.Core.People;
 
 public sealed class PersonDirectory(IDbContextFactory<BookingDbContext> dbFactory) : IPersonDirectory
 {
-    public async Task<Person> SignInAsync(string externalId, string name, string? email, CancellationToken ct = default)
+    public async Task<SignedInPerson> SignInAsync(string externalId, string name, string? email, CancellationToken ct = default)
     {
-        var trimmedName = name.Trim();
-        var normalizedEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
-
-        if (await TryRefreshAsync(externalId, trimmedName, normalizedEmail, ct) is { } existing)
+        if (await TryRefreshAsync(externalId, name, email, ct) is { } existing)
         {
             return existing;
         }
@@ -19,22 +16,22 @@ public sealed class PersonDirectory(IDbContextFactory<BookingDbContext> dbFactor
         try
         {
             await using var db = await dbFactory.CreateDbContextAsync(ct);
-            var person = new Person { ExternalId = externalId, Name = trimmedName, Email = normalizedEmail };
+            var person = Person.FromLogin(externalId, name, email);
             db.People.Add(person);
             await db.SaveChangesAsync(ct);
-            return person;
+            return SignedInPerson.From(person);
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException
         {
             SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: BookingDbContext.PersonExternalIdIndex
         })
         {
-            return await TryRefreshAsync(externalId, trimmedName, normalizedEmail, ct)
+            return await TryRefreshAsync(externalId, name, email, ct)
                 ?? throw new InvalidOperationException($"Person with external id '{externalId}' vanished during sign-in.", ex);
         }
     }
 
-    private async Task<Person?> TryRefreshAsync(string externalId, string name, string? email, CancellationToken ct)
+    private async Task<SignedInPerson?> TryRefreshAsync(string externalId, string name, string? email, CancellationToken ct)
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var person = await db.People.SingleOrDefaultAsync(p => p.ExternalId == externalId, ct);
@@ -43,9 +40,8 @@ public sealed class PersonDirectory(IDbContextFactory<BookingDbContext> dbFactor
             return null;
         }
 
-        person.Name = name;
-        person.Email = email;
+        person.RefreshProfile(name, email);
         await db.SaveChangesAsync(ct);
-        return person;
+        return SignedInPerson.From(person);
     }
 }

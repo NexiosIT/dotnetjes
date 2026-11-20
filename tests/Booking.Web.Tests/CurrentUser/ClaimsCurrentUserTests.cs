@@ -16,10 +16,10 @@ public class ClaimsCurrentUserTests
     {
         public List<(string ExternalId, string Name, string? Email)> Calls { get; } = [];
 
-        public Task<Person> SignInAsync(string externalId, string name, string? email, CancellationToken ct = default)
+        public Task<SignedInPerson> SignInAsync(string externalId, string name, string? email, CancellationToken ct = default)
         {
             Calls.Add((externalId, name, email));
-            return Task.FromResult(new Person { Id = 42, Name = name });
+            return Task.FromResult(new SignedInPerson(42, name, email, true, externalId));
         }
     }
 

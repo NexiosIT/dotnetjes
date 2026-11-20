@@ -78,7 +78,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
         var (service, _) = await CreateAsync();
         var d1 = await Get(service, "D1");
 
-        var ex = await Assert.ThrowsAsync<AdminValidationException>(() =>
+        var ex = await Assert.ThrowsAsync<DomainValidationException>(() =>
             service.SetParkingDetailsAsync(d1.Id, location, hasCharger));
 
         Assert.Equal("Only parking spots have a location or charger.", ex.Message);
@@ -89,7 +89,7 @@ public sealed class ParkingDetailsTests(PostgresFixture postgres)
     {
         var (service, _) = await CreateAsync();
 
-        var ex = await Assert.ThrowsAsync<AdminValidationException>(() =>
+        var ex = await Assert.ThrowsAsync<DomainValidationException>(() =>
             service.SetParkingDetailsAsync(9999, ParkingLocation.Outside, false));
 
         Assert.Equal("That item no longer exists.", ex.Message);

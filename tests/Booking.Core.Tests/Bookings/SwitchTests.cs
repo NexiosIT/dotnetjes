@@ -131,7 +131,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
         await ctx.InsertBooking("Anna", "P2", ctx.Today);
         await using (var db = await ctx.DbFactory.CreateDbContextAsync())
         {
-            db.Waitlist.Add(new WaitlistEntry { PersonId = ctx.Person("Anna"), Date = ctx.Today, CreatedAt = BookingTestContext.Now.UtcDateTime });
+            db.Waitlist.Add(WaitlistEntry.Reconstitute(ctx.Person("Anna"), ctx.Today, BookingTestContext.Now.UtcDateTime));
             await db.SaveChangesAsync();
         }
 

@@ -22,44 +22,31 @@ public sealed class AdminService(IDbContextFactory<BookingDbContext> dbFactory) 
 
     public async Task<Resource> AddResourceAsync(string code, string name, ResourceType type, CancellationToken ct = default)
     {
-        var normalizedCode = NormalizeCode(code);
-        var trimmedName = Required(name, "Name");
+        var resource = Resource.Create(code, name, type);
 
         await using var db = await dbFactory.CreateDbContextAsync(ct);
-        await EnsureCodeIsFreeAsync(db, normalizedCode, exceptId: null, ct);
+        await EnsureCodeIsFreeAsync(db, resource.Code, exceptId: null, ct);
 
-        var resource = new Resource { Code = normalizedCode, Name = trimmedName, Type = type };
         db.Resources.Add(resource);
-        await SaveAsync(db, normalizedCode, ct);
+        await SaveAsync(db, resource.Code, ct);
         return resource;
     }
 
     public async Task UpdateResourceAsync(int id, string code, string name, bool isActive, CancellationToken ct = default)
     {
-        var normalizedCode = NormalizeCode(code);
-        var trimmedName = Required(name, "Name");
-
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var resource = await db.Resources.SingleOrDefaultAsync(r => r.Id == id, ct) ?? throw Gone();
-        await EnsureCodeIsFreeAsync(db, normalizedCode, exceptId: id, ct);
+        resource.Update(code, name, isActive);
+        await EnsureCodeIsFreeAsync(db, resource.Code, exceptId: id, ct);
 
-        resource.Code = normalizedCode;
-        resource.Name = trimmedName;
-        resource.IsActive = isActive;
-        await SaveAsync(db, normalizedCode, ct);
+        await SaveAsync(db, resource.Code, ct);
     }
 
     public async Task SetParkingDetailsAsync(int id, ParkingLocation? location, bool hasCharger, CancellationToken ct = default)
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var resource = await db.Resources.SingleOrDefaultAsync(r => r.Id == id, ct) ?? throw Gone();
-        if (resource.Type != ResourceType.Parking && (location is not null || hasCharger))
-        {
-            throw new AdminValidationException("Only parking spots have a location or charger.");
-        }
-
-        resource.Location = location;
-        resource.HasCharger = hasCharger;
+        resource.SetParkingDetails(location, hasCharger);
         await db.SaveChangesAsync(ct);
     }
 
@@ -76,20 +63,8 @@ public sealed class AdminService(IDbContextFactory<BookingDbContext> dbFactory) 
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var person = await db.People.SingleOrDefaultAsync(p => p.Id == id, ct) ?? throw Gone();
 
-        person.IsActive = isActive;
+        person.SetActive(isActive);
         await db.SaveChangesAsync(ct);
-    }
-
-    private static string NormalizeCode(string? code) => Required(code, "Code").ToUpperInvariant();
-
-    private static string Required(string? value, string field)
-    {
-        var trimmed = value?.Trim();
-        if (string.IsNullOrEmpty(trimmed))
-        {
-            throw new AdminValidationException($"{field} is required.");
-        }
-        return trimmed;
     }
 
     private static async Task EnsureCodeIsFreeAsync(BookingDbContext db, string code, int? exceptId, CancellationToken ct)
@@ -116,8 +91,8 @@ public sealed class AdminService(IDbContextFactory<BookingDbContext> dbFactory) 
         }
     }
 
-    private static AdminValidationException DuplicateCode(string code) =>
+    private static DomainValidationException DuplicateCode(string code) =>
         new($"A resource with code {code} already exists.");
 
-    private static AdminValidationException Gone() => new("That item no longer exists.");
+    private static DomainValidationException Gone() => new("That item no longer exists.");
 }

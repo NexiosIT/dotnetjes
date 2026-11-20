@@ -52,10 +52,15 @@ public sealed class BookingService(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        var (person, resource, error) = await CheckAsync(db, personId, resourceId, date, ct);
-        if (error is not null)
+        var (person, resource) = await LoadAsync(db, personId, resourceId, ct);
+        if (person is null || resource is null)
         {
-            return BookingResult.Fail(error.Value);
+            return BookingResult.Fail(BookingError.NotFound);
+        }
+        var made = BookingEntity.Book(person, resource, date, calendar, time.GetUtcNow().UtcDateTime);
+        if (made.Error is { } refused)
+        {
+            return BookingResult.Fail(refused);
         }
 
         if (await db.Bookings.AnyAsync(b => b.ResourceId == resource.Id && b.Date == date, ct))
@@ -67,16 +72,9 @@ public sealed class BookingService(
             return BookingResult.Fail(BookingError.AlreadyBookedThatType);
         }
 
-        var booking = new BookingEntity
-        {
-            PersonId = person.Id,
-            ResourceId = resource.Id,
-            ResourceType = resource.Type,
-            Date = date,
-            CreatedAt = time.GetUtcNow().UtcDateTime
-        };
+        var booking = made.Value!;
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        if (IsChargerSpot(resource))
+        if (resource.IsChargerSpot)
         {
             await db.Waitlist.Where(w => w.PersonId == person.Id && w.Date == date).ExecuteDeleteAsync(ct);
         }
@@ -113,13 +111,9 @@ public sealed class BookingService(
         {
             return BookingResult.Fail(BookingError.NotFound);
         }
-        if (booking.PersonId != personId)
+        if (booking.CanBeCancelledBy(personId, calendar.Today) is { } refused)
         {
-            return BookingResult.Fail(BookingError.NotYourBooking);
-        }
-        if (booking.Date < calendar.Today)
-        {
-            return BookingResult.Fail(BookingError.OutOfRange);
+            return BookingResult.Fail(refused);
         }
 
         var deleted = await db.Bookings
@@ -131,7 +125,7 @@ public sealed class BookingService(
             return BookingResult.Fail(BookingError.NotFound);
         }
 
-        if (IsChargerSpot(booking.Resource))
+        if (booking.Resource.IsChargerSpot)
         {
             notifier.ChargerSpotFreed(new ChargerSpotFreed(booking.Date, booking.ResourceId, personId));
         }
@@ -142,10 +136,15 @@ public sealed class BookingService(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        var (person, resource, error) = await CheckAsync(db, personId, resourceId, date, ct);
-        if (error is not null)
+        var (person, resource) = await LoadAsync(db, personId, resourceId, ct);
+        if (person is null || resource is null)
         {
-            return BookingResult.Fail(error.Value);
+            return BookingResult.Fail(BookingError.NotFound);
+        }
+        var made = BookingEntity.Book(person, resource, date, calendar, time.GetUtcNow().UtcDateTime);
+        if (made.Error is { } refused)
+        {
+            return BookingResult.Fail(refused);
         }
         var old = await db.Bookings.Include(b => b.Resource)
             .SingleOrDefaultAsync(b => b.PersonId == person.Id && b.ResourceType == resource.Type && b.Date == date, ct);
@@ -162,18 +161,11 @@ public sealed class BookingService(
             return BookingResult.Fail(BookingError.ResourceTaken);
         }
 
-        var booking = new BookingEntity
-        {
-            PersonId = person.Id,
-            ResourceId = resource.Id,
-            ResourceType = resource.Type,
-            Date = date,
-            CreatedAt = time.GetUtcNow().UtcDateTime
-        };
+        var booking = made.Value!;
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
         db.Bookings.Remove(old);
         await db.SaveChangesAsync(ct);
-        if (IsChargerSpot(resource))
+        if (resource.IsChargerSpot)
         {
             await db.Waitlist.Where(w => w.PersonId == person.Id && w.Date == date).ExecuteDeleteAsync(ct);
         }
@@ -188,30 +180,15 @@ public sealed class BookingService(
         }
         await transaction.CommitAsync(ct);
 
-        if (IsChargerSpot(old.Resource))
+        if (old.Resource.IsChargerSpot)
         {
             notifier.ChargerSpotFreed(new ChargerSpotFreed(date, old.ResourceId, person.Id));
         }
         return BookingResult.Ok(booking.Id);
     }
 
-    /// <summary>The checks Book and Switch share. Order: NotFound → OutOfRange → Weekend → PersonInactive → ResourceInactive.</summary>
-    private async Task<(Person Person, Resource Resource, BookingError? Error)> CheckAsync(
-        BookingDbContext db, int personId, int resourceId, DateOnly date, CancellationToken ct)
-    {
-        var person = await db.People.AsNoTracking().SingleOrDefaultAsync(p => p.Id == personId, ct);
-        var resource = await db.Resources.AsNoTracking().SingleOrDefaultAsync(r => r.Id == resourceId, ct);
-        BookingError? error =
-            person is null || resource is null ? BookingError.NotFound
-            : date < calendar.Today || date > calendar.LastBookableDay ? BookingError.OutOfRange
-            : date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? BookingError.Weekend
-            : !person.IsActive ? BookingError.PersonInactive
-            : !resource.IsActive ? BookingError.ResourceInactive
-            : null;
-        return (person!, resource!, error);
-    }
-
-    /// <summary>The spots the waitlist is about (charger waitlist design).</summary>
-    private static bool IsChargerSpot(Resource resource) =>
-        resource is { Type: ResourceType.Parking, HasCharger: true, IsActive: true };
+    private static async Task<(Person? Person, Resource? Resource)> LoadAsync(
+        BookingDbContext db, int personId, int resourceId, CancellationToken ct) =>
+        (await db.People.AsNoTracking().SingleOrDefaultAsync(p => p.Id == personId, ct),
+         await db.Resources.AsNoTracking().SingleOrDefaultAsync(r => r.Id == resourceId, ct));
 }

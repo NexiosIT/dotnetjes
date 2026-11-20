@@ -4,11 +4,15 @@ namespace Booking.Core.Tests.Waitlist;
 
 public class WaitlistEmailComposerTests
 {
-    private static readonly Person Anna = new() { Name = "Anna <A>", Email = "anna@example.com" };
-    private static readonly Resource P1 = new()
+    private static readonly Person Anna = Person.FromLogin("kc-anna", "Anna <A>", "anna@example.com");
+    private static readonly Resource P1 = ChargerSpot();
+
+    private static Resource ChargerSpot()
     {
-        Code = "P1", Name = "Parking 1", Type = ResourceType.Parking, Location = ParkingLocation.Basement, HasCharger = true
-    };
+        var spot = Resource.Create("P1", "Parking 1", ResourceType.Parking);
+        spot.SetParkingDetails(ParkingLocation.Basement, hasCharger: true);
+        return spot;
+    }
     private static readonly DateOnly Tuesday = new(2026, 11, 24);
 
     [Fact]

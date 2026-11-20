@@ -9,10 +9,10 @@ public sealed class DailySummarySenderTests
 
     private static readonly Person[] People =
     [
-        new() { Id = 1, Name = "Anna", Email = "anna@example.com" },
-        new() { Id = 2, Name = "Ben", Email = "ben@example.com" },
-        new() { Id = 3, Name = "Chris", Email = "chris@example.com", IsActive = false },
-        new() { Id = 4, Name = "Dana", Email = null },
+        Person.Reconstitute(1, "Anna", "anna@example.com"),
+        Person.Reconstitute(2, "Ben", "ben@example.com"),
+        Person.Reconstitute(3, "Chris", "chris@example.com", isActive: false),
+        Person.Reconstitute(4, "Dana", null),
     ];
 
     private static DailySummarySender CreateSender(IEmailSender emails, FakeBookingService? bookings = null) =>

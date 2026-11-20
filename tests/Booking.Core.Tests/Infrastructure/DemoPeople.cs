@@ -11,7 +11,7 @@ internal static class DemoPeople
     {
         foreach (var name in Names)
         {
-            db.People.Add(new Person { Name = name, Email = $"{name.ToLowerInvariant()}@example.com" });
+            db.People.Add(Person.FromLogin($"demo-{name}", name, $"{name.ToLowerInvariant()}@example.com"));
         }
         await db.SaveChangesAsync();
     }

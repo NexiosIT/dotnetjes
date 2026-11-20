@@ -18,7 +18,7 @@ public sealed class WaitlistEmailSenderTests(PostgresFixture postgres)
         await using var db = await ctx.DbFactory.CreateDbContextAsync();
         foreach (var name in names)
         {
-            db.Waitlist.Add(new WaitlistEntry { PersonId = ctx.Person(name), Date = date, CreatedAt = BookingTestContext.Now.UtcDateTime });
+            db.Waitlist.Add(WaitlistEntry.Reconstitute(ctx.Person(name), date, BookingTestContext.Now.UtcDateTime));
         }
         await db.SaveChangesAsync();
     }
