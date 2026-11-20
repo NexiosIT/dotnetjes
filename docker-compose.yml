@@ -6,6 +6,9 @@ services:
     environment:
       ConnectionStrings__Booking: "Host=db;Port=5432;Database=booking;Username=booking;Password=booking"
       Smtp__Host: mailpit
+      DataProtection__KeysPath: /keys
+    volumes:
+      - dpkeys:/keys
     depends_on:
       db:
         condition: service_healthy
@@ -37,3 +40,4 @@ services:
 
 volumes:
   pgdata:
+  dpkeys:

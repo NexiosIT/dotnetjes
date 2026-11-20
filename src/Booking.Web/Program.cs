@@ -2,6 +2,7 @@ using Booking.Core.Calendar;
 using Booking.Core.Data;
 using Booking.Web.Components;
 using Booking.Web.Setup;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,13 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContextFactory<BookingDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Booking")));
 builder.Services.AddSingleton(TimeProvider.System);
+
+// In Docker the keys must outlive the container, or cookies issued before a
+// `docker compose up --build` can't be decrypted afterwards.
+if (builder.Configuration["DataProtection:KeysPath"] is { Length: > 0 } keysPath)
+{
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+}
 builder.Services.AddSingleton<IOfficeCalendar>(sp => new OfficeCalendar(
     sp.GetRequiredService<TimeProvider>(),
     TimeZoneInfo.FindSystemTimeZoneById(builder.Configuration["App:TimeZone"] ?? "Europe/Brussels"),
