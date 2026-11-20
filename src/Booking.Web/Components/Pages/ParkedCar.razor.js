@@ -1,7 +1,9 @@
-// One goose honk and one engine rev, see wwwroot/sounds/CREDITS.md for sources and licences.
+// See wwwroot/sounds/CREDITS.md for sources and licences.
 const sounds = {
     vroom: new Audio("sounds/car-vroom.mp3"),
     honk: new Audio("sounds/goose-honk.mp3"),
+    crash: new Audio("sounds/car-crash.mp3"),
+    ambulance: new Audio("sounds/ambulance-siren.mp3"),
 };
 
 function play(name) {
@@ -51,7 +53,9 @@ export async function driveOutAndCrash(car, crashedTemplate) {
     ], { duration: 1300, easing: "cubic-bezier(.5, 0, .9, .6)", fill: "forwards" });
     await drive.finished;
 
-    // Impact: swap in the wreck, bounce back a little, shake the button.
+    // Impact: crash sound, swap in the wreck, bounce back a little, shake the button.
+    sounds.vroom.pause();
+    play("crash");
     flyer.innerHTML = crashedTemplate.innerHTML;
     target.classList.add("crash-shake");
     setTimeout(() => target.classList.remove("crash-shake"), 600);
@@ -60,8 +64,9 @@ export async function driveOutAndCrash(car, crashedTemplate) {
         { transform: `translate(${dx - 18}px, ${dy + 6}px) rotate(-8deg)` },
     ], { duration: 250, easing: "ease-out", fill: "forwards" });
 
-    // Let everyone admire the wreck, then fade it away.
-    await new Promise(r => setTimeout(r, 2500));
-    await flyer.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: "forwards" }).finished;
+    // As soon as the crash has died down the ambulance arrives, and the wreck fades away under the siren.
+    await new Promise(r => setTimeout(r, 1300));
+    play("ambulance");
+    await flyer.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 2500, fill: "forwards" }).finished;
     flyer.remove();
 }
