@@ -1,0 +1,74 @@
+.parked {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: .75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    background: linear-gradient(to bottom right, rgb(6 182 212 / .15), transparent);
+    box-shadow: inset 0 0 0 1px rgb(6 182 212 / .3);   /* parking accent, like the Parking column */
+}
+
+.bay {
+    position: relative;
+    width: 300px;
+    height: 84px;
+    overflow: hidden;
+    background: #334155;   /* asphalt on the dark theme */
+    border-radius: 6px;
+}
+
+/* Painted bay at the left: two white lines and the spot code on the asphalt. */
+.bay::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    width: 140px;
+    height: 72px;
+    border: 3px solid #fff;
+    border-right: none;
+}
+
+.bay-code {
+    position: absolute;
+    left: 14px;
+    top: 4px;
+    color: #fff;
+    font-weight: 700;
+    font-size: .85rem;
+    letter-spacing: .05em;
+}
+
+.car {
+    position: absolute;
+    left: 20px;
+    top: 14px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.car.arriving {
+    animation: drive-in 1.6s cubic-bezier(.2, .8, .3, 1) both;
+}
+
+.car:active svg {
+    transform: scale(.95);
+}
+
+.car:focus-visible {
+    outline: 3px solid #ffd166;
+    border-radius: 8px;
+}
+
+@keyframes drive-in {
+    0%   { transform: translateX(320px); }
+    85%  { transform: translateX(-6px); }  /* a touch too far... */
+    100% { transform: translateX(0); }     /* ...and settle */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .car.arriving { animation: none; }
+}

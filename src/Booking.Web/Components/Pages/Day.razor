@@ -49,6 +49,11 @@ else
         <p class="mb-4 rounded-xl bg-rose-500/10 px-4 py-2.5 text-sm text-rose-200 ring-1 ring-rose-500/30" role="alert">@_message</p>
     }
 
+    @if (_car is var (carCode, leaving))
+    {
+        <ParkedCar @key="(carCode, leaving)" Code="@carCode" Leaving="leaving" Closed="() => _car = null" />
+    }
+
     <div class="grid gap-6 md:grid-cols-2">
         <section class="min-w-0">
             <h2 class="mb-2 text-xs uppercase tracking-wider text-slate-500">Desks</h2>
@@ -160,6 +165,7 @@ else
     private bool _busy;         // a Book/Cancel call is running — buttons are disabled
     private ParkingLocation? _location;   // parking filter; null = all locations
     private bool _chargerOnly;           // parking filter: only spots with an EV charger
+    private (string Code, bool Leaving)? _car;   // last parking Book/Cancel: car drives in, or out and crashes
     private bool _onWaitlist;            // on the charger waitlist for _date
     private bool _hasEmail;              // the waitlist needs an email address (from Keycloak)
 
@@ -188,6 +194,7 @@ else
     {
         if (!CanGoBack) return;
         _message = null;
+        _car = null;
         _date = Calendar.PreviousWeekday(_date);
         await LoadDay();
     }
@@ -196,6 +203,7 @@ else
     {
         if (!CanGoForward) return;
         _message = null;
+        _car = null;
         _date = Calendar.NextWeekday(_date);
         await LoadDay();
     }
@@ -250,11 +258,14 @@ else
         if (_busy) return;
         _busy = true;
         _message = null;
+        _car = null;
         try
         {
             var result = await action();
             if (result.Error is BookingError error)
                 _message = BookingMessages.For(error, slot);
+            else if (slot.Type == ResourceType.Parking)
+                _car = (slot.Code, Leaving: slot.BookingId is not null);   // had a booking = this was a cancel
             await LoadDay();
         }
         finally

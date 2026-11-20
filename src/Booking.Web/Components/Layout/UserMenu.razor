@@ -9,7 +9,8 @@
         <span class="hidden max-w-48 truncate rounded-full bg-white/10 px-3 py-1 text-sm sm:inline-block" title="@name">@name</span>
         <form method="post" action="logout">
             <AntiforgeryToken />
-            <button type="submit" class="rounded-lg px-2.5 py-1 text-sm text-slate-400 ring-1 ring-white/15 hover:bg-white/10 hover:text-slate-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-fuchsia-400">Log out</button>
+            @* The id is the target of the "car crashes into Log out" animation after cancelling a parking spot. *@
+            <button type="submit" id="logout-button" class="rounded-lg px-2.5 py-1 text-sm text-slate-400 ring-1 ring-white/15 hover:bg-white/10 hover:text-slate-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-fuchsia-400">Log out</button>
         </form>
     </div>
 </AuthorizeView>
