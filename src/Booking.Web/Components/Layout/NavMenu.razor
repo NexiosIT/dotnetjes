@@ -1,26 +1,34 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Desk & Parking</a>
-    </div>
-</div>
+@* Top bar shared by every page: wordmark, Book/Admin links and the signed-in user. *@
+@implements IDisposable
+@inject NavigationManager Navigation
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Book
-            </NavLink>
+<header class="border-b border-white/10">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div class="flex min-w-0 items-center gap-3 sm:gap-6">
+            <a href="" class="shrink-0 bg-linear-to-r from-fuchsia-400 to-cyan-300 bg-clip-text font-semibold text-transparent"><span class="sm:hidden">d&amp;p</span><span class="hidden sm:inline">desk&amp;parking</span></a>
+            <nav class="flex gap-1 text-sm">
+                <a href="" class="@LinkClass(!OnAdminPage)" aria-current="@(OnAdminPage ? null : "page")">Book</a>
+                @* Only users with the Keycloak client role Admin see the Admin link. *@
+                <AuthorizeView Policy="@AdminAccess.Policy">
+                    <a href="admin/resources" class="@LinkClass(OnAdminPage)" aria-current="@(OnAdminPage ? "page" : null)">Admin</a>
+                </AuthorizeView>
+            </nav>
         </div>
+        <UserMenu />
+    </div>
+</header>
 
-        <AuthorizeView Policy="@AdminAccess.Policy">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="admin/resources">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Admin
-                </NavLink>
-            </div>
-        </AuthorizeView>
-    </nav>
-</div>
+@code {
+    /// <summary>Admin stays highlighted on every admin page, not just the one its link points at.</summary>
+    private bool OnAdminPage => Navigation.ToBaseRelativePath(Navigation.Uri).StartsWith("admin/", StringComparison.OrdinalIgnoreCase);
 
+    private static string LinkClass(bool active) => active
+        ? "rounded-lg bg-white/10 px-2.5 py-1.5 text-white sm:px-3"
+        : "rounded-lg px-2.5 py-1.5 text-slate-400 hover:text-slate-200 sm:px-3";
+
+    protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}
