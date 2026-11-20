@@ -8,6 +8,7 @@
     </button>
     @if (_open)
     {
+        <div style="position: fixed; inset: 0; z-index: 999;" @onclick="() => _open = false"></div>
         <ul class="dropdown-menu show" style="right: 0; left: auto;">
             @foreach (var person in _people)
             {
