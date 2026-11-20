@@ -1,4 +1,4 @@
-using Booking.Core.Waitlist;
+using Booking.Application.Waitlist;
 
 namespace Booking.Web.Components.Pages;
 

@@ -1,4 +1,4 @@
-using Booking.Core.Services;
+using Booking.Application.Bookings;
 using Booking.Web.Components.Pages;
 
 namespace Booking.Web.Tests;

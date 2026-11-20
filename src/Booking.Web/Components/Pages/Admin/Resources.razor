@@ -107,7 +107,7 @@ else
 }
 
 @code {
-    private IReadOnlyList<Resource>? resources;
+    private IReadOnlyList<ResourceView>? resources;
     private string? error;
 
     private string newCode = "";
@@ -129,7 +129,7 @@ else
         newName = "";
     });
 
-    private void StartEdit(Resource r)
+    private void StartEdit(ResourceView r)
     {
         editingId = r.Id;
         editCode = r.Code;
@@ -139,20 +139,20 @@ else
 
     private void CancelEdit() => editingId = null;
 
-    private Task SaveEditAsync(Resource r) => RunAsync(async () =>
+    private Task SaveEditAsync(ResourceView r) => RunAsync(async () =>
     {
         await Admin.UpdateResourceAsync(r.Id, editCode, editName, r.IsActive);
         editingId = null;
     });
 
-    private Task ToggleActiveAsync(Resource r) =>
+    private Task ToggleActiveAsync(ResourceView r) =>
         RunAsync(() => Admin.UpdateResourceAsync(r.Id, r.Code, r.Name, !r.IsActive));
 
-    private Task SetLocationAsync(Resource r, string? value) =>
+    private Task SetLocationAsync(ResourceView r, string? value) =>
         RunAsync(() => Admin.SetParkingDetailsAsync(
             r.Id, Enum.TryParse<ParkingLocation>(value, out var location) ? location : null, r.HasCharger));
 
-    private Task ToggleChargerAsync(Resource r) =>
+    private Task ToggleChargerAsync(ResourceView r) =>
         RunAsync(() => Admin.SetParkingDetailsAsync(r.Id, r.Location, !r.HasCharger));
 
     /// <summary>Runs an admin change, shows a validation message if it was refused, and reloads the table either way.</summary>

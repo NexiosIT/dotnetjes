@@ -1,12 +1,13 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Booking.Core/Booking.Core.csproj" />
+    <Project Path="src/Booking.Application/Booking.Application.csproj" />
     <Project Path="src/Booking.Domain/Booking.Domain.csproj" />
+    <Project Path="src/Booking.Infrastructure/Booking.Infrastructure.csproj" />
     <Project Path="src/Booking.Web/Booking.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Booking.Core.Tests/Booking.Core.Tests.csproj" />
     <Project Path="tests/Booking.Domain.Tests/Booking.Domain.Tests.csproj" />
+    <Project Path="tests/Booking.IntegrationTests/Booking.IntegrationTests.csproj" />
     <Project Path="tests/Booking.Web.Tests/Booking.Web.Tests.csproj" />
   </Folder>
 </Solution>

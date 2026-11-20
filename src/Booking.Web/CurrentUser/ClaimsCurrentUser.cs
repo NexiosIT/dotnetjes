@@ -1,4 +1,4 @@
-using Booking.Core.People;
+using Booking.Application.People;
 using Booking.Web.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
 

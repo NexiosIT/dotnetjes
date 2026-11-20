@@ -43,14 +43,14 @@ else
 }
 
 @code {
-    private IReadOnlyList<Person>? people;
+    private IReadOnlyList<PersonView>? people;
     private string? error;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync() => people = await Admin.GetPeopleAsync();
 
-    private Task ToggleActiveAsync(Person p) =>
+    private Task ToggleActiveAsync(PersonView p) =>
         RunAsync(() => Admin.SetPersonActiveAsync(p.Id, !p.IsActive));
 
     /// <summary>Runs an admin change, shows a validation message if it was refused, and reloads the table either way.</summary>

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Booking.Core.People;
 using Booking.Web.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -69,7 +68,6 @@ public static class AuthFeature
         });
         services.AddCascadingAuthenticationState();
 
-        services.AddScoped<IPersonDirectory, PersonDirectory>();
         return services;
     }
 
