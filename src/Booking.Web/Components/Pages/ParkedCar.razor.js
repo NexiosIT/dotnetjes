@@ -1,4 +1,4 @@
-// Real recordings, see wwwroot/sounds/CREDITS.md for sources and licences.
+// One goose honk and one engine rev, see wwwroot/sounds/CREDITS.md for sources and licences.
 const sounds = {
     vroom: new Audio("sounds/car-vroom.mp3"),
     honk: new Audio("sounds/goose-honk.mp3"),
