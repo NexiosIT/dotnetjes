@@ -1,0 +1,65 @@
+<Project>
+  <!--
+    Compiles Styles/app.css into wwwroot/app.css with the Tailwind standalone CLI (no Node needed).
+    The CLI for this machine is downloaded once into obj/tailwind/<version>/.
+    Runs in dotnet build/run/publish, in the IDE and in the Docker SDK stage.
+  -->
+  <PropertyGroup>
+    <TailwindVersion>4.3.4</TailwindVersion>
+    <TailwindDir>$(MSBuildProjectDirectory)/$(BaseIntermediateOutputPath)tailwind/$(TailwindVersion)/</TailwindDir>
+    <TailwindInput>$(MSBuildProjectDirectory)/Styles/app.css</TailwindInput>
+    <TailwindOutput>$(MSBuildProjectDirectory)/wwwroot/app.css</TailwindOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TailwindSource Include="Styles/**/*.css;Components/**/*.razor" />
+  </ItemGroup>
+
+  <Target Name="TailwindResolveCli">
+    <PropertyGroup>
+      <_TailwindArch>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_TailwindArch>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('Windows')) And '$(_TailwindArch)' == 'X64'">tailwindcss-windows-x64.exe</TailwindAsset>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(_TailwindArch)' == 'X64'">tailwindcss-linux-x64</TailwindAsset>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(_TailwindArch)' == 'Arm64'">tailwindcss-linux-arm64</TailwindAsset>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(_TailwindArch)' == 'X64'">tailwindcss-macos-x64</TailwindAsset>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(_TailwindArch)' == 'Arm64'">tailwindcss-macos-arm64</TailwindAsset>
+      <TailwindCli>$(TailwindDir)$(TailwindAsset)</TailwindCli>
+    </PropertyGroup>
+
+    <Error Condition="'$(TailwindAsset)' == ''"
+           Text="Tailwind: no standalone CLI for $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription) ($(_TailwindArch)). Supported: Windows x64, Linux x64/arm64, macOS x64/arm64." />
+
+    <DownloadFile Condition="!Exists('$(TailwindCli)')"
+                  SourceUrl="https://github.com/tailwindlabs/tailwindcss/releases/download/v$(TailwindVersion)/$(TailwindAsset)"
+                  DestinationFolder="$(TailwindDir)" />
+    <Exec Condition="!$([MSBuild]::IsOSPlatform('Windows'))" Command="chmod +x &quot;$(TailwindCli)&quot;" />
+  </Target>
+
+  <!-- Skipped when wwwroot/app.css is newer than every input. -->
+  <Target Name="TailwindBuild"
+          DependsOnTargets="TailwindResolveCli"
+          Inputs="@(TailwindSource)"
+          Outputs="$(TailwindOutput)"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_TailwindMinify Condition="'$(Configuration)' == 'Release'">--minify</_TailwindMinify>
+    </PropertyGroup>
+    <Exec Command="&quot;$(TailwindCli)&quot; -i &quot;$(TailwindInput)&quot; -o &quot;$(TailwindOutput)&quot; $(_TailwindMinify)"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <!--
+    Always runs (even when TailwindBuild was skipped): on a clean clone wwwroot/app.css did not exist when the
+    project was evaluated, so it is missing from Content and static web assets would never serve it.
+  -->
+  <Target Name="TailwindIncludeOutput" BeforeTargets="BeforeBuild"
+          DependsOnTargets="TailwindBuild" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_TailwindOutputFull>$([System.IO.Path]::GetFullPath('$(TailwindOutput)'))</_TailwindOutputFull>
+    </PropertyGroup>
+    <ItemGroup>
+      <_TailwindOutputInContent Include="@(Content)" Condition="'%(FullPath)' == '$(_TailwindOutputFull)'" />
+      <Content Include="wwwroot\app.css" CopyToPublishDirectory="PreserveNewest" Condition="'@(_TailwindOutputInContent)' == ''" />
+    </ItemGroup>
+  </Target>
+</Project>
