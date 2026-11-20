@@ -1,4 +1,4 @@
-@* One desk or parking spot in the day view. Owned by Person B — task B2. *@
+@* One desk or parking spot in the day view. Owned by Person B — tasks B2 and B3. *@
 
 <li class="list-group-item d-flex align-items-center gap-2">
     <strong class="slot-code">@Slot.Code</strong>
@@ -6,13 +6,13 @@
     @if (Slot.BookingId is null)
     {
         <span>free</span>
-        <button type="button" class="btn btn-primary btn-sm" disabled="@(CurrentPersonId is null)"
+        <button type="button" class="btn btn-primary btn-sm" disabled="@(CurrentPersonId is null || Busy)"
                 @onclick="OnBook">Book</button>
     }
     else if (Slot.BookedByPersonId == CurrentPersonId)
     {
         <span class="fw-semibold">You</span>
-        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="OnCancel">Cancel</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" disabled="@Busy" @onclick="OnCancel">Cancel</button>
     }
     else
     {
@@ -25,6 +25,9 @@
 
     /// <summary>The person using this browser, or null when nobody has been picked.</summary>
     [Parameter] public int? CurrentPersonId { get; set; }
+
+    /// <summary>True while a Book/Cancel call is running, so the buttons can't be double-clicked.</summary>
+    [Parameter] public bool Busy { get; set; }
 
     [Parameter] public EventCallback<ResourceSlot> Book { get; set; }
 
