@@ -21,4 +21,6 @@
     <UserSecretsId>297c19d5-01db-4e5f-bfaf-b75815efecdc</UserSecretsId>
   </PropertyGroup>
 
+  <Import Project="Tailwind.targets" />
+
 </Project>

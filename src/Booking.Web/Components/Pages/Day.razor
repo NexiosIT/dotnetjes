@@ -7,23 +7,42 @@
 
 <PageTitle>Book</PageTitle>
 
-<div class="d-flex align-items-center gap-2 mb-3">
-    <h1 class="h3 mb-0 me-2">@_date.ToString("ddd d MMM", CultureInfo.InvariantCulture)</h1>
-    <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Previous day"
-            disabled="@(!CanGoBack)" @onclick="GoBack">◀</button>
-    <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Next day"
-            disabled="@(!CanGoForward)" @onclick="GoForward">▶</button>
+<div class="mb-5 flex items-end justify-between gap-4">
+    <h1>
+        <span class="block text-xs font-normal text-slate-400">@_date.ToString("dddd", CultureInfo.InvariantCulture)</span>
+        <span class="block text-3xl font-black tracking-tight">@_date.ToString("d MMM", CultureInfo.InvariantCulture)</span>
+    </h1>
+    <div class="flex gap-2">
+        <button type="button" class="@ArrowClass" aria-label="Previous day"
+                disabled="@(!CanGoBack)" @onclick="GoBack">‹</button>
+        <button type="button" class="@ArrowClass" aria-label="Next day"
+                disabled="@(!CanGoForward)" @onclick="GoForward">›</button>
+    </div>
 </div>
 
 @if (_day is null)
 {
-    <p>Loading…</p>
+    <p class="text-sm text-slate-400">Loading…</p>
 }
 else
 {
+    var deskCount = Count(_day.Desks);
+    var parkingCount = Count(_day.Parking);
+
+    <div class="mb-5 grid grid-cols-2 gap-3">
+        <div class="rounded-xl bg-linear-to-br from-fuchsia-500/20 to-transparent p-3 ring-1 ring-fuchsia-500/30">
+            <div class="text-2xl font-bold">@deskCount.Free<span class="text-sm text-slate-400">/@deskCount.Total</span></div>
+            <div class="text-xs text-slate-400">desks free</div>
+        </div>
+        <div class="rounded-xl bg-linear-to-br from-cyan-500/20 to-transparent p-3 ring-1 ring-cyan-500/30">
+            <div class="text-2xl font-bold">@parkingCount.Free<span class="text-sm text-slate-400">/@parkingCount.Total</span></div>
+            <div class="text-xs text-slate-400">parking free</div>
+        </div>
+    </div>
+
     @if (_message is not null)
     {
-        <p class="alert alert-warning py-2" role="alert">@_message</p>
+        <p class="mb-4 rounded-xl bg-rose-500/10 px-4 py-2.5 text-sm text-rose-200 ring-1 ring-rose-500/30" role="alert">@_message</p>
     }
 
     @if (_car is var (carCode, leaving))
@@ -31,49 +50,55 @@ else
         <ParkedCar @key="(carCode, leaving)" Code="@carCode" Leaving="leaving" Closed="() => _car = null" />
     }
 
-    <div class="row g-4">
-        <div class="col-md-6">
-            <h2 class="h6 text-uppercase">Desks</h2>
+    <div class="grid gap-6 md:grid-cols-2">
+        <section class="min-w-0">
+            <h2 class="mb-2 text-xs uppercase tracking-wider text-slate-500">Desks</h2>
             @{ var desks = SlotFilter.Apply(_day.Desks, _personId); }
             @if (desks.Count == 0)
             {
-                <p class="text-muted">No free desks this day.</p>
+                <p class="rounded-xl bg-white/5 px-4 py-3 text-sm text-slate-400">No free desks this day.</p>
             }
-            <ul class="list-group">
-                @foreach (var slot in desks)
-                {
-                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
-                }
-            </ul>
-        </div>
-        <div class="col-md-6">
-            <h2 class="h6 text-uppercase">Parking</h2>
-            <div class="d-flex flex-wrap gap-1 mb-2" role="group" aria-label="Filter parking">
-                <button type="button" class="btn btn-sm @(_location is null ? "btn-secondary" : "btn-outline-secondary")"
-                        aria-pressed="@(_location is null)" @onclick="() => _location = null">All</button>
+            else
+            {
+                <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/5">
+                    @foreach (var slot in desks)
+                    {
+                        <SlotRow @key="slot.ResourceId" Slot="slot" Accent="fuchsia" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
+                    }
+                </ul>
+            }
+        </section>
+        <section class="min-w-0">
+            <h2 class="mb-2 text-xs uppercase tracking-wider text-slate-500">Parking</h2>
+            <div class="mb-2 flex flex-wrap gap-1.5" role="group" aria-label="Filter parking">
+                <button type="button" class="@Chip(_location is null)"
+                        aria-pressed="@(_location is null ? "true" : "false")" @onclick="() => _location = null">All</button>
                 @foreach (var location in ParkingLocations.All)
                 {
-                    <button type="button" class="btn btn-sm @(_location == location ? "btn-secondary" : "btn-outline-secondary")"
-                            aria-pressed="@(_location == location)" @onclick="() => _location = location">@ParkingLocations.Label(location)</button>
+                    <button type="button" class="@Chip(_location == location)"
+                            aria-pressed="@(_location == location ? "true" : "false")" @onclick="() => _location = location">@ParkingLocations.Label(location)</button>
                 }
-                <button type="button" class="btn btn-sm @(_chargerOnly ? "btn-success" : "btn-outline-success")"
-                        aria-pressed="@_chargerOnly" @onclick="() => _chargerOnly = !_chargerOnly">⚡ Charger</button>
+                <button type="button" class="@ChargerChip(_chargerOnly)"
+                        aria-pressed="@(_chargerOnly ? "true" : "false")" @onclick="() => _chargerOnly = !_chargerOnly">⚡ Charger</button>
             </div>
             @{ var parking = SlotFilter.Apply(_day.Parking, _personId, _location, _chargerOnly); }
             @if (parking.Count == 0)
             {
-                <p class="text-muted">No free spots match this filter.</p>
+                <p class="rounded-xl bg-white/5 px-4 py-3 text-sm text-slate-400">No free spots match this filter.</p>
             }
-            <ul class="list-group">
-                @foreach (var slot in parking)
-                {
-                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
-                }
-            </ul>
-        </div>
+            else
+            {
+                <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/5">
+                    @foreach (var slot in parking)
+                    {
+                        <SlotRow @key="slot.ResourceId" Slot="slot" Accent="cyan" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
+                    }
+                </ul>
+            }
+        </section>
     </div>
 
-    <p class="mt-4">
+    <p class="mt-6 text-sm text-slate-400">
         @if (_day.PeopleInOffice.Count == 0)
         {
             @:Nobody booked yet.
@@ -86,6 +111,21 @@ else
 }
 
 @code {
+    private const string ArrowClass =
+        "grid h-9 w-9 place-items-center rounded-full bg-white/10 text-lg hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/10";
+
+    private static string Chip(bool on) => on
+        ? "rounded-full bg-cyan-500 px-3 py-1 text-xs font-semibold text-slate-950"
+        : "rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300 ring-1 ring-white/10 hover:bg-white/10";
+
+    private static string ChargerChip(bool on) => on
+        ? "rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-slate-950"
+        : "rounded-full bg-white/5 px-3 py-1 text-xs text-amber-300 ring-1 ring-amber-400/30 hover:bg-white/10";
+
+    /// <summary>Free and total for the counters: all of the day's slots, not just the filtered list.</summary>
+    private static (int Free, int Total) Count(IReadOnlyList<ResourceSlot> slots) =>
+        (slots.Count(s => s.BookingId is null), slots.Count);
+
     private DateOnly _date;
     private DayOverview? _day;
     private int? _personId;

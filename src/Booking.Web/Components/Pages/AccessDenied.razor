@@ -1,0 +1,11 @@
+@page "/access-denied"
+@* Shown for /admin/* to users without the Keycloak client role Admin: by the cookie handler's AccessDeniedPath
+   (full page load) and by AuthorizeRouteView's NotAuthorized (navigation inside the app). *@
+
+<PageTitle>No access</PageTitle>
+
+<div class="rounded-xl bg-white/5 p-6 ring-1 ring-white/10">
+    <h1 class="text-3xl font-black tracking-tight">No access</h1>
+    <p class="mt-2 text-slate-300">You don't have access to the admin pages.</p>
+    <a href="" class="mt-4 inline-block text-fuchsia-300 hover:underline">← Back to booking</a>
+</div>

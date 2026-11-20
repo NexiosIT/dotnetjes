@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book page – three directions</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<style>
+  .choice.selected { outline: 4px solid #6366f1; outline-offset: 6px; }
+  .choice { cursor: pointer; transition: transform .15s; }
+  .choice:hover { transform: translateY(-2px); }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+<div class="max-w-[1500px] mx-auto px-6 py-8">
+  <h1 class="text-2xl font-bold">The Book page: three directions</h1>
+  <p class="text-slate-500 mt-1 mb-8">The same data in each (Fri 20 Nov, you are Anna). Click the one that feels closest; you can mix ideas in the terminal.</p>
+
+  <div class="grid gap-10 xl:grid-cols-3">
+
+    <!-- ============ A: Clean & light ============ -->
+    <div class="choice rounded-2xl" data-choice="a-clean" onclick="toggleSelect(this)">
+      <div class="flex items-baseline gap-2 mb-3"><span class="font-bold text-indigo-600">A</span><span class="font-semibold">Clean &amp; light</span><span class="text-sm text-slate-500">· tiles, week strip, top bar</span></div>
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-slate-200">
+        <!-- top bar -->
+        <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 rounded-lg bg-indigo-600 text-white grid place-items-center font-bold text-sm">D</div>
+            <span class="font-semibold">Desk &amp; Parking</span>
+          </div>
+          <nav class="hidden sm:flex gap-1 text-sm">
+            <span class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 font-medium">Book</span>
+            <span class="px-3 py-1.5 rounded-lg text-slate-500">Admin</span>
+          </nav>
+          <div class="flex items-center gap-2 rounded-full border border-slate-200 pl-1 pr-3 py-1 text-sm">
+            <span class="h-6 w-6 rounded-full bg-rose-400 text-white grid place-items-center text-xs font-bold">A</span>Anna ▾
+          </div>
+        </div>
+        <div class="p-5">
+          <!-- week strip -->
+          <div class="flex items-center gap-2 mb-5">
+            <button class="h-9 w-9 rounded-lg border border-slate-200 text-slate-400">‹</button>
+            <div class="grid grid-cols-5 gap-2 flex-1 text-center text-sm">
+              <div class="rounded-xl py-1.5 bg-indigo-600 text-white shadow"><div class="text-[11px] opacity-80">Fri</div><div class="font-semibold">20</div></div>
+              <div class="rounded-xl py-1.5 bg-slate-50"><div class="text-[11px] text-slate-400">Mon</div><div class="font-semibold">23</div></div>
+              <div class="rounded-xl py-1.5 bg-slate-50"><div class="text-[11px] text-slate-400">Tue</div><div class="font-semibold">24</div></div>
+              <div class="rounded-xl py-1.5 bg-slate-50"><div class="text-[11px] text-slate-400">Wed</div><div class="font-semibold">25</div></div>
+              <div class="rounded-xl py-1.5 bg-slate-50"><div class="text-[11px] text-slate-400">Thu</div><div class="font-semibold">26</div></div>
+            </div>
+            <button class="h-9 w-9 rounded-lg border border-slate-200 text-slate-600">›</button>
+          </div>
+          <!-- your booking banner -->
+          <div class="rounded-xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3 mb-5 text-sm flex items-center justify-between">
+            <span>✓ You're in on Friday · <b>D2</b> and <b>P2</b></span>
+          </div>
+          <!-- desks -->
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Desks</h3>
+            <span class="text-xs text-slate-500">5 of 8 free</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2 mb-5 text-sm">
+            <div class="rounded-xl border-2 border-dashed border-indigo-200 p-2 text-center hover:bg-indigo-50"><div class="font-bold">D1</div><div class="text-[11px] text-indigo-600 font-medium">Book</div></div>
+            <div class="rounded-xl bg-indigo-600 text-white p-2 text-center shadow"><div class="font-bold">D2</div><div class="text-[11px] opacity-90">You · ✕</div></div>
+            <div class="rounded-xl bg-slate-100 p-2 text-center text-slate-500"><div class="font-bold">D3</div><div class="text-[11px]">Ben</div></div>
+            <div class="rounded-xl border-2 border-dashed border-indigo-200 p-2 text-center"><div class="font-bold">D4</div><div class="text-[11px] text-indigo-600 font-medium">Book</div></div>
+            <div class="rounded-xl bg-slate-100 p-2 text-center text-slate-500"><div class="font-bold">D5</div><div class="text-[11px]">Chris</div></div>
+            <div class="rounded-xl border-2 border-dashed border-indigo-200 p-2 text-center"><div class="font-bold">D6</div><div class="text-[11px] text-indigo-600 font-medium">Book</div></div>
+            <div class="rounded-xl border-2 border-dashed border-indigo-200 p-2 text-center"><div class="font-bold">D7</div><div class="text-[11px] text-indigo-600 font-medium">Book</div></div>
+            <div class="rounded-xl border-2 border-dashed border-indigo-200 p-2 text-center"><div class="font-bold">D8</div><div class="text-[11px] text-indigo-600 font-medium">Book</div></div>
+          </div>
+          <!-- parking -->
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Parking</h3>
+            <span class="text-xs text-slate-500">2 of 4 free</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2 mb-5 text-sm">
+            <div class="rounded-xl bg-slate-100 p-2 text-center text-slate-500"><div class="font-bold">P1</div><div class="text-[11px]">Ben</div></div>
+            <div class="rounded-xl bg-indigo-600 text-white p-2 text-center shadow"><div class="font-bold">P2</div><div class="text-[11px] opacity-90">You · ✕</div></div>
+            <div class="rounded-xl border-2 border-dashed border-indigo-200 p-2 text-center"><div class="font-bold">P3</div><div class="text-[11px] text-indigo-600 font-medium">Book</div></div>
+            <div class="rounded-xl border-2 border-dashed border-indigo-200 p-2 text-center"><div class="font-bold">P4</div><div class="text-[11px] text-indigo-600 font-medium">Book</div></div>
+          </div>
+          <!-- people -->
+          <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
+            <div class="flex -space-x-2">
+              <span class="h-8 w-8 rounded-full ring-2 ring-white bg-rose-400 text-white grid place-items-center text-xs font-bold">A</span>
+              <span class="h-8 w-8 rounded-full ring-2 ring-white bg-sky-500 text-white grid place-items-center text-xs font-bold">B</span>
+              <span class="h-8 w-8 rounded-full ring-2 ring-white bg-amber-500 text-white grid place-items-center text-xs font-bold">C</span>
+            </div>
+            <span class="text-sm text-slate-600">Anna, Ben and Chris are in</span>
+          </div>
+        </div>
+      </div>
+      <ul class="mt-4 text-sm text-slate-600 list-disc pl-5 space-y-1">
+        <li>Everything visible at once, works on a phone (tiles wrap).</li>
+        <li>Week strip: one tap to any bookable day instead of stepping with arrows.</li>
+        <li>Calm and professional; easy to keep consistent on the admin pages.</li>
+      </ul>
+    </div>
+
+    <!-- ============ B: Office map ============ -->
+    <div class="choice rounded-2xl" data-choice="b-map" onclick="toggleSelect(this)">
+      <div class="flex items-baseline gap-2 mb-3"><span class="font-bold text-indigo-600">B</span><span class="font-semibold">Office map</span><span class="text-sm text-slate-500">· desks laid out like the room</span></div>
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-slate-200">
+        <div class="flex items-center justify-between px-5 py-3 bg-slate-900 text-white">
+          <span class="font-semibold">🏢 Desk &amp; Parking</span>
+          <div class="flex items-center gap-3 text-sm">
+            <span class="opacity-60">Admin</span>
+            <span class="rounded-full bg-white/10 px-3 py-1">Anna ▾</span>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-4">
+            <button class="h-9 w-9 rounded-full bg-slate-100 text-slate-400">‹</button>
+            <div class="text-center"><div class="text-lg font-bold">Friday 20 November</div><div class="text-xs text-slate-500">5 desks · 2 parking spots free</div></div>
+            <button class="h-9 w-9 rounded-full bg-slate-100">›</button>
+          </div>
+          <!-- floor -->
+          <div class="rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50 ring-1 ring-slate-200 p-4 mb-4 relative">
+            <div class="absolute top-2 right-3 text-[10px] uppercase tracking-widest text-slate-400">Window side</div>
+            <div class="grid grid-cols-2 gap-6 mt-4">
+              <div class="space-y-2">
+                <div class="text-[10px] uppercase text-slate-400">Island 1</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <div class="h-14 rounded-lg bg-white ring-2 ring-emerald-400 grid place-items-center text-sm font-bold text-emerald-700">D1</div>
+                  <div class="h-14 rounded-lg bg-indigo-600 text-white grid place-items-center text-sm font-bold">D2<span class="text-[9px] font-normal -mt-3">you</span></div>
+                  <div class="h-14 rounded-lg bg-slate-300 grid place-items-center text-sm font-bold text-slate-600">D3<span class="text-[9px] font-normal -mt-3">Ben</span></div>
+                  <div class="h-14 rounded-lg bg-white ring-2 ring-emerald-400 grid place-items-center text-sm font-bold text-emerald-700">D4</div>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <div class="text-[10px] uppercase text-slate-400">Island 2</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <div class="h-14 rounded-lg bg-slate-300 grid place-items-center text-sm font-bold text-slate-600">D5<span class="text-[9px] font-normal -mt-3">Chris</span></div>
+                  <div class="h-14 rounded-lg bg-white ring-2 ring-emerald-400 grid place-items-center text-sm font-bold text-emerald-700">D6</div>
+                  <div class="h-14 rounded-lg bg-white ring-2 ring-emerald-400 grid place-items-center text-sm font-bold text-emerald-700">D7</div>
+                  <div class="h-14 rounded-lg bg-white ring-2 ring-emerald-400 grid place-items-center text-sm font-bold text-emerald-700">D8</div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 text-[10px] uppercase text-slate-400">Entrance ↓</div>
+          </div>
+          <!-- parking lot -->
+          <div class="rounded-2xl bg-slate-800 p-3">
+            <div class="grid grid-cols-4 gap-2">
+              <div class="h-16 border-x-2 border-dashed border-yellow-300/70 grid place-items-center text-xs text-white/60">P1<br>🚗 Ben</div>
+              <div class="h-16 border-x-2 border-dashed border-yellow-300/70 grid place-items-center text-xs text-indigo-200 font-bold">P2<br>🚗 you</div>
+              <div class="h-16 border-x-2 border-dashed border-yellow-300/70 grid place-items-center text-sm font-bold text-emerald-300">P3</div>
+              <div class="h-16 border-x-2 border-dashed border-yellow-300/70 grid place-items-center text-sm font-bold text-emerald-300">P4</div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-500 mt-3">Tap a green spot to book it; tap yours to cancel.</p>
+        </div>
+      </div>
+      <ul class="mt-4 text-sm text-slate-600 list-disc pl-5 space-y-1">
+        <li>Biggest "wow" at a demo; people pick a spot by where it is.</li>
+        <li><b>Catch:</b> the app doesn't know where desks are. Real positions need new data and admin screens (Person A's model) — the islands here are invented.</li>
+        <li>Hard to fit on a phone once there are many desks.</li>
+      </ul>
+    </div>
+
+    <!-- ============ C: Dark & bold ============ -->
+    <div class="choice rounded-2xl" data-choice="c-dark" onclick="toggleSelect(this)">
+      <div class="flex items-baseline gap-2 mb-3"><span class="font-bold text-indigo-600">C</span><span class="font-semibold">Dark &amp; bold</span><span class="text-sm text-slate-500">· today's list layout, restyled</span></div>
+      <div class="rounded-2xl shadow-xl overflow-hidden bg-slate-950 text-slate-100 ring-1 ring-slate-800">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-white/10">
+          <span class="font-semibold bg-gradient-to-r from-fuchsia-400 to-cyan-300 bg-clip-text text-transparent">desk&amp;parking</span>
+          <span class="rounded-full bg-white/10 px-3 py-1 text-sm">Anna ▾</span>
+        </div>
+        <div class="p-5">
+          <div class="flex items-end justify-between mb-5">
+            <div><div class="text-xs text-slate-400">Friday</div><div class="text-3xl font-black tracking-tight">20 Nov</div></div>
+            <div class="flex gap-2">
+              <button class="h-9 w-9 rounded-full bg-white/5 text-slate-600">‹</button>
+              <button class="h-9 w-9 rounded-full bg-white/10">›</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-transparent ring-1 ring-fuchsia-500/30 p-3"><div class="text-2xl font-bold">5<span class="text-sm text-slate-400">/8</span></div><div class="text-xs text-slate-400">desks free</div></div>
+            <div class="rounded-xl bg-gradient-to-br from-cyan-500/20 to-transparent ring-1 ring-cyan-500/30 p-3"><div class="text-2xl font-bold">2<span class="text-sm text-slate-400">/4</span></div><div class="text-xs text-slate-400">parking free</div></div>
+          </div>
+          <div class="text-xs uppercase tracking-wider text-slate-500 mb-2">Desks</div>
+          <ul class="divide-y divide-white/5 rounded-xl bg-white/5 mb-5 text-sm">
+            <li class="flex items-center gap-3 px-3 py-2"><b class="w-7">D1</b><span class="flex-1 text-slate-400">Desk 1</span><span class="rounded-full bg-emerald-400/15 text-emerald-300 px-2 text-xs">free</span><button class="rounded-lg bg-fuchsia-500 px-3 py-1 text-xs font-semibold">Book</button></li>
+            <li class="flex items-center gap-3 px-3 py-2 bg-fuchsia-500/10"><b class="w-7">D2</b><span class="flex-1 text-slate-400">Desk 2</span><span class="text-fuchsia-300 text-xs font-semibold">You</span><button class="rounded-lg ring-1 ring-white/20 px-3 py-1 text-xs">Cancel</button></li>
+            <li class="flex items-center gap-3 px-3 py-2 text-slate-500"><b class="w-7 text-slate-400">D3</b><span class="flex-1">Desk 3</span><span class="text-xs">Ben</span></li>
+            <li class="flex items-center gap-3 px-3 py-2"><b class="w-7">D4</b><span class="flex-1 text-slate-400">Desk 4</span><span class="rounded-full bg-emerald-400/15 text-emerald-300 px-2 text-xs">free</span><button class="rounded-lg bg-fuchsia-500 px-3 py-1 text-xs font-semibold">Book</button></li>
+            <li class="px-3 py-2 text-xs text-slate-500">… D5–D8</li>
+          </ul>
+          <div class="text-xs uppercase tracking-wider text-slate-500 mb-2">Parking</div>
+          <ul class="divide-y divide-white/5 rounded-xl bg-white/5 text-sm">
+            <li class="flex items-center gap-3 px-3 py-2 text-slate-500"><b class="w-7 text-slate-400">P1</b><span class="flex-1">Parking 1</span><span class="text-xs">Ben</span></li>
+            <li class="flex items-center gap-3 px-3 py-2 bg-cyan-500/10"><b class="w-7">P2</b><span class="flex-1 text-slate-400">Parking 2</span><span class="text-cyan-300 text-xs font-semibold">You</span><button class="rounded-lg ring-1 ring-white/20 px-3 py-1 text-xs">Cancel</button></li>
+            <li class="px-3 py-2 text-xs text-slate-500">… P3, P4</li>
+          </ul>
+        </div>
+      </div>
+      <ul class="mt-4 text-sm text-slate-600 list-disc pl-5 space-y-1">
+        <li>Striking and modern; smallest change to how the page works.</li>
+        <li>Lists get long with many desks; you scroll to find a free one.</li>
+        <li>Dark-only can feel heavy for an office tool used every morning.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="mt-10 rounded-xl bg-white ring-1 ring-slate-200 p-5 text-sm text-slate-600">
+    <b class="text-slate-800">My pick: A.</b> It's built for the daily "is there a free desk on Tuesday? book it" moment, works on a phone, and carries over cleanly to the admin pages. I'd borrow C's two "free" counters as a small touch. B is the most eye-catching but needs desk positions the app doesn't have.
+  </div>
+</div>
+</body>
+</html>

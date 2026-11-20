@@ -18,10 +18,10 @@
             </svg>
         </button>
     </div>
-    <span class="parked-text">
+    <span class="text-sm text-slate-300">
         @(Leaving ? $"Left {Code}. Mind the Log out button…" : $"Parked in {Code}. Click the car to honk.")
     </span>
-    <button type="button" class="btn-close ms-auto" aria-label="Close" @onclick="Close"></button>
+    <button type="button" class="ml-auto rounded-lg px-2 py-1 text-slate-400 ring-1 ring-white/15 hover:bg-white/10 hover:text-slate-200" aria-label="Close" @onclick="Close">✕</button>
 
     @* The wreck, swapped in by the script on impact. *@
     <div hidden @ref="_crashed">

@@ -1,0 +1,72 @@
+/* Tailwind input. The build compiles this into wwwroot/app.css (see Tailwind.targets); don't edit that file. */
+@import "tailwindcss" source(none);
+@source "../Components";
+
+/* --- Blazor framework hooks (no Tailwind equivalent: these elements are created or toggled by blazor.web.js) --- */
+
+h1:focus {
+    outline: none;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid var(--color-emerald-500);
+}
+
+.invalid {
+    outline: 1px solid var(--color-rose-500);
+}
+
+.validation-message {
+    color: var(--color-rose-300);
+}
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    background: var(--color-rose-950);
+    color: var(--color-rose-100);
+    border-top: 1px solid color-mix(in oklab, var(--color-rose-500) 40%, transparent);
+}
+
+#blazor-error-ui .reload {
+    color: var(--color-rose-300);
+    text-decoration: underline;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+.blazor-error-boundary {
+    padding: 1rem;
+    border-radius: var(--radius-xl);
+    background: color-mix(in oklab, var(--color-rose-500) 15%, transparent);
+    color: var(--color-rose-100);
+}
+
+.blazor-error-boundary::after {
+    content: "An error has occurred.";
+}
+
+/* The Log out button gets hit by the car after cancelling a parking spot (ParkedCar.razor.js). */
+.crash-shake {
+    animation: crash-shake .6s ease-out;
+}
+
+@keyframes crash-shake {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    15% { transform: translate(-6px, 2px) rotate(-6deg); }
+    30% { transform: translate(5px, -2px) rotate(5deg); }
+    45% { transform: translate(-4px, 1px) rotate(-3deg); }
+    60% { transform: translate(3px, 0) rotate(2deg); }
+    80% { transform: translate(-1px, 0) rotate(-1deg); }
+}

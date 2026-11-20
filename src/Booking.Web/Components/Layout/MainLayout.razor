@@ -1,20 +1,10 @@
 @inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<NavMenu />
 
-    <main>
-        <div class="top-row px-4">
-            <UserMenu />
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<main class="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+    @Body
+</main>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
