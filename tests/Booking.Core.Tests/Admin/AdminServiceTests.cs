@@ -15,6 +15,7 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
         await using (var db = await factory.CreateDbContextAsync())
         {
             await SeedData.EnsureSeededAsync(db);
+            await DemoPeople.AddAsync(db);
         }
         return new AdminService(factory);
     }

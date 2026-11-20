@@ -25,7 +25,7 @@ public sealed class DatabaseTests(PostgresFixture postgres)
         await using var check = await factory.CreateDbContextAsync();
         Assert.Equal(8, await check.Resources.CountAsync(r => r.Type == ResourceType.Desk));
         Assert.Equal(4, await check.Resources.CountAsync(r => r.Type == ResourceType.Parking));
-        Assert.Equal(6, await check.People.CountAsync());
+        Assert.Equal(0, await check.People.CountAsync()); // people come from Keycloak logins
     }
 
     [Fact]
