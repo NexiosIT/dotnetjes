@@ -32,6 +32,7 @@ DDD with a clean-architecture split. Dependencies point inwards only: `Web → I
 ## Conventions
 
 - **TDD.** Write the failing test first. A rule about one aggregate gets a fast test in `Booking.Domain.Tests`; use cases are tested against real Postgres in `Booking.IntegrationTests` via `BookingTestContext` (frozen clock: today is Wed 2026-11-18; seeded desks D1–D8, parking P1–P4 with chargers on P1 and P3; demo people Anna, Ben, Chris, Dana, Eli, Fien). Logic that would sit in a `.razor` file goes in a small static class next to it (`SlotFilter`, `ChargerWaitlist`) so it can be unit-tested.
+- **Test names** follow Gherkin: `GivenSituation_WhenAction_ThenOutcome` (PascalCase inside each part, underscores only between parts; leave out `Given…_` when there's no meaningful setup, join extra clauses with `And`). Example: `GivenTheTargetSpotIsTaken_WhenSwitching_ThenTheOldBookingIsKept`.
 - **Tailwind:** write full class names in markup or C# string constants. Never build them from pieces (`$"bg-{accent}-500"`): the Tailwind scanner wouldn't find them. Rebuild after adding classes.
 - **Secrets** never go in appsettings or git: user-secrets for `dotnet run`, `.env` (gitignored) for Docker.
 - **No comments inside method bodies.** Put the why in the XML doc comment (`///`) on the member, or above a field/class. Before every commit, run the `remove-method-comments` skill on the changed files: a `PreToolUse` hook (`.claude/settings.json` → `.claude/hooks/require-method-comments.sh`) blocks `git commit` while changed `.cs`/`.razor` files lack its sign-off.
