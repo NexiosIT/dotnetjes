@@ -1,4 +1,5 @@
 using Booking.Core.Services;
+using Booking.Core.Waitlist;
 
 namespace Booking.Web.Setup;
 
@@ -8,6 +9,7 @@ public static class BookingFeature
     public static IServiceCollection AddBookingFeature(this IServiceCollection services)
     {
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<IWaitlistService, WaitlistService>();
         return services;
     }
 }

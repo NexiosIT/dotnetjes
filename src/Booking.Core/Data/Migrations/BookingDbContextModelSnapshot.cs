@@ -129,6 +129,32 @@ namespace Booking.Core.Data.Migrations
                     b.ToTable("Resources");
                 });
 
+            modelBuilder.Entity("Booking.Core.Entities.WaitlistEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId", "Date")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Waitlist_Person_Date");
+
+                    b.ToTable("Waitlist", (string)null);
+                });
+
             modelBuilder.Entity("Booking.Core.Entities.Booking", b =>
                 {
                     b.HasOne("Booking.Core.Entities.Person", "Person")
@@ -146,6 +172,17 @@ namespace Booking.Core.Data.Migrations
                     b.Navigation("Person");
 
                     b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("Booking.Core.Entities.WaitlistEntry", b =>
+                {
+                    b.HasOne("Booking.Core.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
                 });
 #pragma warning restore 612, 618
         }

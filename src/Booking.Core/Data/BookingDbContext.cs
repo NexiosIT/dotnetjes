@@ -9,10 +9,12 @@ public class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbCo
     public const string PersonTypeDateIndex = "IX_Bookings_Person_Type_Date";
     public const string ResourceCodeIndex = "IX_Resources_Code";
     public const string PersonExternalIdIndex = "IX_People_ExternalId";
+    public const string WaitlistIndex = "IX_Waitlist_Person_Date";
 
     public DbSet<Person> People => Set<Person>();
     public DbSet<Resource> Resources => Set<Resource>();
     public DbSet<Entities.Booking> Bookings => Set<Entities.Booking>();
+    public DbSet<WaitlistEntry> Waitlist => Set<WaitlistEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +37,12 @@ public class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbCo
             booking.Property(b => b.ResourceType).HasConversion<string>().HasMaxLength(20);
             booking.HasIndex(b => new { b.ResourceId, b.Date }).IsUnique().HasDatabaseName(ResourceDateIndex);
             booking.HasIndex(b => new { b.PersonId, b.ResourceType, b.Date }).IsUnique().HasDatabaseName(PersonTypeDateIndex);
+        });
+
+        modelBuilder.Entity<WaitlistEntry>(entry =>
+        {
+            entry.ToTable("Waitlist");
+            entry.HasIndex(w => new { w.PersonId, w.Date }).IsUnique().HasDatabaseName(WaitlistIndex);
         });
     }
 }

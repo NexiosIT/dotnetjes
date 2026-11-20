@@ -22,12 +22,14 @@ public sealed class BookingTestContext
     private BookingTestContext(
         IDbContextFactory<BookingDbContext> dbFactory,
         FakeTimeProvider time,
+        OfficeCalendar calendar,
         BookingService service,
         Dictionary<string, int> people,
         Dictionary<string, int> resources)
     {
         DbFactory = dbFactory;
         Time = time;
+        Calendar = calendar;
         Service = service;
         _people = people;
         _resources = resources;
@@ -35,6 +37,7 @@ public sealed class BookingTestContext
 
     public IDbContextFactory<BookingDbContext> DbFactory { get; }
     public FakeTimeProvider Time { get; }
+    public OfficeCalendar Calendar { get; }
     public BookingService Service { get; }
     public DateOnly Today { get; } = new(2026, 11, 18);
 
@@ -52,7 +55,7 @@ public sealed class BookingTestContext
         var zone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels");
         var calendar = new OfficeCalendar(time, zone, maxDaysAhead: 14);
 
-        return new BookingTestContext(dbFactory, time, new BookingService(dbFactory, calendar, time), people, resources);
+        return new BookingTestContext(dbFactory, time, calendar, new BookingService(dbFactory, calendar, time), people, resources);
     }
 
     public int Person(string name) => _people[name];
