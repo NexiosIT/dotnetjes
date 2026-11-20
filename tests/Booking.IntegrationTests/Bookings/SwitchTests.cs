@@ -174,4 +174,27 @@ public sealed class SwitchTests(PostgresFixture postgres)
 
         Assert.Empty(ctx.Notifier.Freed);
     }
+
+    /// <summary>
+    /// Same person, two tabs: one cancels (or switches) while the other is switching. The other tab holds the row lock
+    /// on the old booking until it commits; the switch must then answer NotFound instead of crashing the page.
+    /// </summary>
+    [Fact]
+    public async Task Old_booking_removed_mid_switch_is_NotFound_not_a_crash()
+    {
+        var ctx = await BookingTestContext.CreateAsync(postgres);
+        var old = await ctx.InsertBooking("Anna", "P2", ctx.Today);
+
+        await using var other = await ctx.DbFactory.CreateDbContextAsync();
+        await using var otherTab = await other.Database.BeginTransactionAsync();
+        await other.Bookings.Where(b => b.Id == old).ExecuteDeleteAsync();
+
+        var switching = ctx.Service.SwitchAsync(ctx.Person("Anna"), ctx.Resource("P1"), ctx.Today);
+        await Task.Delay(500);
+        await otherTab.CommitAsync();
+        var result = await switching;
+
+        Assert.Equal(BookingError.NotFound, result.Error);
+        Assert.Null(await Holder(ctx, "P1", ctx.Today));
+    }
 }
