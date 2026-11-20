@@ -1,2 +1,59 @@
-@* Owned by Person B — task B1 turns this into the "You: <name> ▾" picker. *@
-<span class="user-picker">You: —</span>
+@implements IDisposable
+@inject ICurrentUser CurrentUser
+@inject IAdminService Admin
+
+<div class="user-picker dropdown">
+    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => _open = !_open">
+        @(_current is null ? "Pick who you are" : $"You: {_current.Name}") ▾
+    </button>
+    @if (_open)
+    {
+        <ul class="dropdown-menu show" style="right: 0; left: auto;">
+            @foreach (var person in _people)
+            {
+                <li>
+                    <button type="button" class="dropdown-item @(person.Id == _current?.Id ? "active" : null)"
+                            @onclick="() => Pick(person.Id)">@person.Name</button>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private IReadOnlyList<Person> _people = [];
+    private Person? _current;
+    private bool _open;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser.Changed += OnChanged;
+        _people = (await Admin.GetPeopleAsync()).Where(p => p.IsActive).ToList();
+        await Refresh();
+    }
+
+    private async Task Refresh()
+    {
+        var id = await CurrentUser.GetPersonIdAsync();
+        _current = _people.FirstOrDefault(p => p.Id == id);
+        if (id is not null && _current is null)
+        {
+            // Stored id is stale (unknown or deactivated person): forget it.
+            await CurrentUser.ClearAsync();
+        }
+    }
+
+    private async Task Pick(int personId)
+    {
+        _open = false;
+        await CurrentUser.SetAsync(personId);
+    }
+
+    private void OnChanged() => _ = InvokeAsync(async () =>
+    {
+        await Refresh();
+        StateHasChanged();
+    });
+
+    public void Dispose() => CurrentUser.Changed -= OnChanged;
+}
