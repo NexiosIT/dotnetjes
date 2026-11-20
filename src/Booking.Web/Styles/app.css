@@ -1,5 +1,5 @@
 /* Tailwind input. The build compiles this into wwwroot/app.css (see Tailwind.targets); don't edit that file. */
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @source "../Components";
 
 /* --- Blazor framework hooks (no Tailwind equivalent: these elements are created or toggled by blazor.web.js) --- */

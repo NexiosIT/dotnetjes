@@ -27,7 +27,7 @@ else
     <li class="@RowBase text-slate-500">
         <strong class="@CodeClass text-slate-400">@Slot.Code</strong>
         @NameAndBadges
-        <span class="max-w-[40%] truncate text-xs">taken by @Slot.BookedByName</span>
+        <span class="max-w-[40%] truncate text-xs" title="taken by @Slot.BookedByName">taken by @Slot.BookedByName</span>
     </li>
 }
 
@@ -36,7 +36,7 @@ else
     // Grows with longer codes (up to 35% of the row) so a code never runs into the name.
     private const string CodeClass = "min-w-8 max-w-[35%] shrink-0 truncate";
     private const string Disabled = " disabled:cursor-not-allowed disabled:opacity-40";
-    private const string CancelButton = "shrink-0 rounded-lg px-3 py-1 text-xs ring-1 ring-white/20 hover:bg-white/10" + Disabled;
+    private const string CancelButton = "shrink-0 rounded-lg px-3 py-1 text-xs ring-1 ring-white/20 enabled:hover:bg-white/10" + Disabled;
 
     [Parameter, EditorRequired] public ResourceSlot Slot { get; set; } = default!;
 
@@ -60,14 +60,14 @@ else
 
     // Full class names (not built from Accent) so the Tailwind build can find them.
     private string BookButton => (IsCyan
-        ? "shrink-0 rounded-lg bg-cyan-500 px-3 py-1 text-xs font-semibold text-slate-950 hover:bg-cyan-400"
-        : "shrink-0 rounded-lg bg-fuchsia-500 px-3 py-1 text-xs font-semibold hover:bg-fuchsia-400") + Disabled;
+        ? "shrink-0 rounded-lg bg-cyan-500 px-3 py-1 text-xs font-semibold text-slate-950 enabled:hover:bg-cyan-400"
+        : "shrink-0 rounded-lg bg-fuchsia-500 px-3 py-1 text-xs font-semibold enabled:hover:bg-fuchsia-400") + Disabled;
 
     /// <summary>The name (truncated when long) followed by the location and charger badges, which always stay visible.</summary>
     private RenderFragment NameAndBadges => __builder =>
     {
         <span class="flex min-w-0 flex-1 items-center gap-1.5">
-            <span class="truncate text-slate-400">@Slot.Name</span>
+            <span class="truncate text-slate-400" title="@Slot.Name">@Slot.Name</span>
             @if (Slot.Location is ParkingLocation location)
             {
                 <span class="shrink-0 rounded-full bg-white/10 px-2 text-xs text-slate-300">@ParkingLocations.Label(location)</span>

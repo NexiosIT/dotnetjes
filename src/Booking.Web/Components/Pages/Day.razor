@@ -67,14 +67,14 @@ else
             <h2 class="mb-2 text-xs uppercase tracking-wider text-slate-500">Parking</h2>
             <div class="mb-2 flex flex-wrap gap-1.5" role="group" aria-label="Filter parking">
                 <button type="button" class="@Chip(_location is null)"
-                        aria-pressed="@(_location is null)" @onclick="() => _location = null">All</button>
+                        aria-pressed="@(_location is null ? "true" : "false")" @onclick="() => _location = null">All</button>
                 @foreach (var location in ParkingLocations.All)
                 {
                     <button type="button" class="@Chip(_location == location)"
-                            aria-pressed="@(_location == location)" @onclick="() => _location = location">@ParkingLocations.Label(location)</button>
+                            aria-pressed="@(_location == location ? "true" : "false")" @onclick="() => _location = location">@ParkingLocations.Label(location)</button>
                 }
                 <button type="button" class="@ChargerChip(_chargerOnly)"
-                        aria-pressed="@_chargerOnly" @onclick="() => _chargerOnly = !_chargerOnly">⚡ Charger</button>
+                        aria-pressed="@(_chargerOnly ? "true" : "false")" @onclick="() => _chargerOnly = !_chargerOnly">⚡ Charger</button>
             </div>
             @{ var parking = SlotFilter.Apply(_day.Parking, _personId, _location, _chargerOnly); }
             @if (parking.Count == 0)

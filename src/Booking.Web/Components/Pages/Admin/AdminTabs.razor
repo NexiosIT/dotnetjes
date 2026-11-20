@@ -13,9 +13,9 @@
         {
             <span class="text-sm @(summaryOk ? "text-emerald-300" : "text-rose-300")" role="status">@summaryMessage</span>
         }
-        <button class="rounded-lg bg-linear-to-r from-fuchsia-500 to-cyan-500 px-4 py-2 text-sm font-semibold hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40"
+        <button class="rounded-lg bg-linear-to-r from-fuchsia-500 to-cyan-500 px-4 py-2 text-sm font-semibold hover:brightness-110 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40"
                 disabled="@sending" @onclick="SendSummaryAsync">
-            @(sending ? "Sending…" : "✉ Send today's summary now")
+            @if (sending) { <text>Sending…</text> } else { <span aria-hidden="true">✉</span> <text>Send today's summary now</text> }
         </button>
     </div>
 </div>

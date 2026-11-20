@@ -29,7 +29,7 @@ else
                 @foreach (var p in people)
                 {
                     <tr @key="p.Id" class="@(p.IsActive ? null : "text-slate-500")">
-                        <td class="@Td min-w-28 max-w-xs break-words font-semibold">@p.Name</td>
+                        <td class="@Td min-w-28 max-w-xs wrap-anywhere font-semibold">@p.Name</td>
                         <td class="@Td @(p.IsActive ? "text-slate-300" : null) min-w-56 max-w-xs break-all">@p.Email</td>
                         <td class="@Td">
                             <input type="checkbox" class="@Switch" checked="@p.IsActive"

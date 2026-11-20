@@ -57,7 +57,7 @@ else
                         else
                         {
                             <td class="@Td font-bold">@r.Code</td>
-                            <td class="@Td @(r.IsActive ? "text-slate-300" : null) min-w-32 max-w-xs break-words">@r.Name</td>
+                            <td class="@Td @(r.IsActive ? "text-slate-300" : null) min-w-32 max-w-xs wrap-anywhere">@r.Name</td>
                         }
                         <td class="@Td">
                             <span class="rounded-full px-2 text-xs @(r.Type == ResourceType.Desk ? "bg-fuchsia-500/15 text-fuchsia-300" : "bg-cyan-500/15 text-cyan-300")">@r.Type</span>
