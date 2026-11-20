@@ -51,8 +51,6 @@ public class AuthFeatureTests
     [Fact]
     public void Correlation_and_nonce_cookies_work_over_plain_http()
     {
-        // The callback is a top-level GET (ResponseMode=query), so Lax cookies are sent; Secure-only
-        // cookies would be dropped on http://<host>:8080 and every login would fail.
         var oidc = ConfiguredOidc();
 
         Assert.Equal(SameSiteMode.Lax, oidc.CorrelationCookie.SameSite);
@@ -111,7 +109,6 @@ public class AuthFeatureTests
     [Fact]
     public void Login_lasts_one_working_day_without_renewal()
     {
-        // Roles are read at login; a fixed lifetime makes a removed Admin role apply by the next day at the latest.
         var cookie = ConfiguredServices()
             .GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>()
             .Get(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -133,7 +130,6 @@ public class AuthFeatureTests
     [Fact]
     public async Task Token_validated_ignores_role_claims_from_the_id_token()
     {
-        // A future Keycloak mapper could put a "role" claim in the ID token; only this client's roles may count.
         var context = TokenValidated(TestTokens.WithPayload("""{"resource_access":{"app":{"roles":["viewer"]}}}"""));
         ((ClaimsIdentity)context.Principal!.Identity!).AddClaim(new Claim(AdminAccess.RoleClaimType, "Admin"));
 

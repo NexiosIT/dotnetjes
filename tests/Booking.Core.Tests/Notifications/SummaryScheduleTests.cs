@@ -27,6 +27,5 @@ public sealed class SummaryScheduleTests
 
     [Fact]
     public void NextRun_follows_summer_time() =>
-        // Monday 2026-06-15: Brussels is UTC+2, so 07:00 local is 05:00 UTC.
         Assert.Equal(Utc(6, 15, 5), SummarySchedule.NextRunUtc(Utc(6, 15, 4), Brussels, SevenAm));
 }

@@ -16,7 +16,6 @@ public sealed class WaitlistService(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        // Check order: NotFound → OutOfRange → Weekend → PersonInactive → NoEmail → AlreadyHasCharger → ChargerSpotFree.
         var person = await db.People.AsNoTracking().SingleOrDefaultAsync(p => p.Id == personId, ct);
         if (person is null)
         {
@@ -59,7 +58,6 @@ public sealed class WaitlistService(
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: BookingDbContext.WaitlistIndex })
         {
-            // A simultaneous join (double click, second tab) got there first: the person is on the list either way.
         }
         return WaitlistResult.Ok();
     }

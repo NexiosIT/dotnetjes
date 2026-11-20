@@ -25,7 +25,6 @@ public sealed class BookingService(
             .Select(b => new { b.Id, b.ResourceId, b.PersonId, PersonName = b.Person.Name })
             .ToDictionaryAsync(b => b.ResourceId, ct);
 
-        // Active resources, plus inactive ones that still have a booking that day (rule 7).
         var resources = await db.Resources
             .AsNoTracking()
             .Where(r => r.IsActive || db.Bookings.Any(b => b.ResourceId == r.Id && b.Date == date))
@@ -61,7 +60,6 @@ public sealed class BookingService(
             return BookingResult.Fail(error.Value);
         }
 
-        // Pre-checks give the normal case a clean answer...
         if (await db.Bookings.AnyAsync(b => b.ResourceId == resource.Id && b.Date == date, ct))
         {
             return BookingResult.Fail(BookingError.ResourceTaken);
@@ -79,7 +77,6 @@ public sealed class BookingService(
             Date = date,
             CreatedAt = time.GetUtcNow().UtcDateTime
         };
-        // Getting a charger spot takes you off that day's waitlist, in the same transaction as the booking.
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
         if (IsChargerSpot(resource))
         {
@@ -92,7 +89,6 @@ public sealed class BookingService(
         }
         catch (DbUpdateException ex) when (ConflictFrom(ex) is { } conflict)
         {
-            // ...and the unique indexes decide simultaneous clicks that both passed the pre-checks.
             return BookingResult.Fail(conflict);
         }
         await transaction.CommitAsync(ct);
@@ -114,7 +110,6 @@ public sealed class BookingService(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        // Check order: NotFound → NotYourBooking → OutOfRange (only today or later can be cancelled).
         var booking = await db.Bookings.AsNoTracking().Include(b => b.Resource).SingleOrDefaultAsync(b => b.Id == bookingId, ct);
         if (booking is null)
         {
@@ -129,7 +124,6 @@ public sealed class BookingService(
             return BookingResult.Fail(BookingError.OutOfRange);
         }
 
-        // A single DELETE: if a simultaneous cancel got there first, nothing is deleted and we report NotFound.
         var deleted = await db.Bookings
             .Where(b => b.Id == bookingId && b.PersonId == personId)
             .ExecuteDeleteAsync(ct);
@@ -150,7 +144,6 @@ public sealed class BookingService(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        // Check order: Book's checks → NotFound (no booking of that type to switch from) → ResourceTaken.
         var (person, resource, error) = await CheckAsync(db, personId, resourceId, date, ct);
         if (error is not null)
         {
@@ -171,8 +164,6 @@ public sealed class BookingService(
             return BookingResult.Fail(BookingError.ResourceTaken);
         }
 
-        // Release the old spot and take the new one together: if the new one is lost to a simultaneous click,
-        // the unique index fails the insert and the rollback gives the old spot back.
         var booking = new BookingEntity
         {
             PersonId = person.Id,

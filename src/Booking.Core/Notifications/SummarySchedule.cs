@@ -7,7 +7,6 @@ public static class SummarySchedule
     {
         var localDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(nowUtc, zone).DateTime);
 
-        // At most a weekend plus today stands between now and the next run.
         for (var date = localDate; ; date = date.AddDays(1))
         {
             if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
@@ -18,7 +17,6 @@ public static class SummarySchedule
             var local = date.ToDateTime(sendAt, DateTimeKind.Unspecified);
             if (zone.IsInvalidTime(local))
             {
-                // sendAt falls in the spring-forward gap: send once the clocks have moved on.
                 local = local.AddHours(1);
             }
 

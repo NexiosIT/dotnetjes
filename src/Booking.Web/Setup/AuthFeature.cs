@@ -32,8 +32,6 @@ public static class AuthFeature
             .AddCookie(cookie =>
             {
                 cookie.AccessDeniedPath = "/access-denied";
-                // Roles are only read at login. One working day without renewal means a removed Admin role
-                // applies by the next day at the latest (the default 14 days sliding could mean never).
                 cookie.ExpireTimeSpan = TimeSpan.FromHours(10);
                 cookie.SlidingExpiration = false;
             })
@@ -46,10 +44,6 @@ public static class AuthFeature
                 oidc.ClientId = keycloak.Value.ClientId;
                 oidc.ClientSecret = keycloak.Value.ClientSecret;
                 oidc.ResponseType = OpenIdConnectResponseType.Code;
-                // Keycloak returns with a top-level GET (not form_post), so the correlation and nonce cookies
-                // can be SameSite=Lax and needn't be Secure. The defaults (None + Secure) are dropped by browsers
-                // on plain http://<host>:8080, which would make every login fail. Behind the HTTPS proxy
-                // (forwarded headers on), SameAsRequest still marks them Secure.
                 oidc.ResponseMode = OpenIdConnectResponseMode.Query;
                 oidc.CorrelationCookie.SameSite = SameSiteMode.Lax;
                 oidc.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
@@ -60,8 +54,8 @@ public static class AuthFeature
                 oidc.Scope.Add("openid");
                 oidc.Scope.Add("profile");
                 oidc.Scope.Add("email");
-                oidc.SaveTokens = true; // the id token is sent as id_token_hint on logout
-                oidc.MapInboundClaims = false; // keep Keycloak's names: sub, name, email, preferred_username
+                oidc.SaveTokens = true;
+                oidc.MapInboundClaims = false;
                 oidc.TokenValidationParameters.NameClaimType = "name";
                 oidc.TokenValidationParameters.RoleClaimType = AdminAccess.RoleClaimType;
                 oidc.Events.OnTokenValidated = AddRolesAsync;
@@ -120,7 +114,6 @@ public static class AuthFeature
 
     public static WebApplication MapAuthEndpoints(this WebApplication app)
     {
-        // Binding a form value makes minimal APIs validate the antiforgery token.
         app.MapPost("/logout", ([FromForm] string? returnUrl) => TypedResults.SignOut(
             new AuthenticationProperties { RedirectUri = "/" },
             [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]));

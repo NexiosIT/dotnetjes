@@ -18,17 +18,13 @@ public class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Text columns have no length limit on purpose: a too-long value would fail as a
-        // DbUpdateException, which admin pages don't catch (they only catch AdminValidationException).
         modelBuilder.Entity<Resource>(resource =>
         {
             resource.Property(r => r.Type).HasConversion<string>().HasMaxLength(20);
-            // Text, not a number: adding or reordering enum values needs no migration.
             resource.Property(r => r.Location).HasConversion<string>();
             resource.HasIndex(r => r.Code).IsUnique().HasDatabaseName(ResourceCodeIndex);
         });
 
-        // Unique, but Postgres allows many NULLs, so people who never logged in don't clash.
         modelBuilder.Entity<Person>()
             .HasIndex(p => p.ExternalId).IsUnique().HasDatabaseName(PersonExternalIdIndex);
 

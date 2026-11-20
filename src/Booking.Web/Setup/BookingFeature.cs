@@ -12,7 +12,6 @@ public static class BookingFeature
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IWaitlistService, WaitlistService>();
 
-        // A freed charger spot is queued in memory and emailed in the background, so Cancel/Switch never wait on SMTP.
         services.AddSingleton<ChannelWaitlistNotifier>();
         services.AddSingleton<IWaitlistNotifier>(sp => sp.GetRequiredService<ChannelWaitlistNotifier>());
         services.AddSingleton(new WaitlistEmailSettings(configuration["App:PublicUrl"]));

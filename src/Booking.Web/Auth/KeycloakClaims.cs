@@ -17,7 +17,6 @@ public static class KeycloakClaims
             return null;
         }
 
-        // Admin-created Keycloak users often have no first/last name, so no "name" claim.
         var name = Value(user, "name") ?? Value(user, "preferred_username") ?? sub;
         return new KeycloakUser(sub, name, Value(user, "email"));
     }

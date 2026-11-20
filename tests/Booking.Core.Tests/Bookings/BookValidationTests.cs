@@ -96,7 +96,6 @@ public sealed class BookValidationTests(PostgresFixture postgres)
     [Fact]
     public async Task Book_checks_date_before_active_state()
     {
-        // Order: NotFound → OutOfRange → Weekend → PersonInactive → ResourceInactive.
         var ctx = await BookingTestContext.CreateAsync(postgres);
         await ctx.DeactivatePerson("Ben");
         await ctx.DeactivateResource("D5");

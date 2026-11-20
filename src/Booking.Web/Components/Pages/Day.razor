@@ -265,7 +265,7 @@ else
             if (result.Error is BookingError error)
                 _message = BookingMessages.For(error, slot);
             else if (slot.Type == ResourceType.Parking)
-                _car = (slot.Code, Leaving: slot.BookingId is not null);   // had a booking = this was a cancel
+                _car = (slot.Code, Leaving: slot.BookingId is not null);
             await LoadDay();
         }
         finally

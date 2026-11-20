@@ -58,7 +58,7 @@ public sealed class SwitchTests(PostgresFixture postgres)
     public async Task Switch_without_existing_booking_is_NotFound()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);
-        await ctx.InsertBooking("Anna", "D1", ctx.Today); // a desk doesn't count for parking
+        await ctx.InsertBooking("Anna", "D1", ctx.Today);
 
         var result = await ctx.Service.SwitchAsync(ctx.Person("Anna"), ctx.Resource("P1"), ctx.Today);
 

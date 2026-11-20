@@ -30,7 +30,6 @@ public sealed class PersonDirectory(IDbContextFactory<BookingDbContext> dbFactor
             SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: BookingDbContext.PersonExternalIdIndex
         })
         {
-            // Another request created this person between our lookup and insert: use theirs.
             return await TryRefreshAsync(externalId, trimmedName, normalizedEmail, ct)
                 ?? throw new InvalidOperationException($"Person with external id '{externalId}' vanished during sign-in.", ex);
         }
