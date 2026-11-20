@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Booking.Domain.Bookings" />
+    <Using Include="Booking.Domain.Calendar" />
+    <Using Include="Booking.Domain.People" />
+    <Using Include="Booking.Domain.Resources" />
+    <Using Include="Booking.Domain.Waitlist" />
+  </ItemGroup>
+
+</Project>

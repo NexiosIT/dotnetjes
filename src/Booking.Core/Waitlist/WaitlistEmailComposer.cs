@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Net;
 using System.Text;
-using Booking.Core.Entities;
 using Booking.Core.Notifications;
 
 namespace Booking.Core.Waitlist;

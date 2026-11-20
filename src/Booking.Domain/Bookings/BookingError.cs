@@ -1,4 +1,4 @@
-namespace Booking.Core.Services;
+namespace Booking.Domain.Bookings;
 
 public enum BookingError
 {

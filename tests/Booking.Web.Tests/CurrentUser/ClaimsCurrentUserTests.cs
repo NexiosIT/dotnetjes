@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Booking.Core.Entities;
 using Booking.Core.People;
 using Booking.Web.CurrentUser;
 using Microsoft.AspNetCore.Components.Authorization;

@@ -1,5 +1,4 @@
 using Booking.Core.Data;
-using Booking.Core.Entities;
 using Booking.Core.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 

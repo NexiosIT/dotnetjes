@@ -1,4 +1,4 @@
-namespace Booking.Core.Entities;
+namespace Booking.Domain.Resources;
 
 /// <summary>A bookable desk or parking spot.</summary>
 public class Resource

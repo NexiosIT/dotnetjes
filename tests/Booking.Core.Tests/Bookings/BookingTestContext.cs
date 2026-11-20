@@ -1,11 +1,10 @@
-using Booking.Core.Calendar;
 using Booking.Core.Data;
 using Booking.Core.Services;
 using Booking.Core.Tests.Infrastructure;
 using Booking.Core.Tests.Waitlist;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Time.Testing;
-using BookingEntity = Booking.Core.Entities.Booking;
+using BookingEntity = Booking.Domain.Bookings.Booking;
 
 namespace Booking.Core.Tests.Bookings;
 

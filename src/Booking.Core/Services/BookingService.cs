@@ -1,10 +1,8 @@
-using Booking.Core.Calendar;
 using Booking.Core.Data;
-using Booking.Core.Entities;
 using Booking.Core.Waitlist;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using BookingEntity = Booking.Core.Entities.Booking;
+using BookingEntity = Booking.Domain.Bookings.Booking;
 
 namespace Booking.Core.Services;
 

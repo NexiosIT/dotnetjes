@@ -24,4 +24,12 @@
     <ProjectReference Include="..\..\src\Booking.Core\Booking.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Booking.Domain.Bookings" />
+    <Using Include="Booking.Domain.Calendar" />
+    <Using Include="Booking.Domain.People" />
+    <Using Include="Booking.Domain.Resources" />
+    <Using Include="Booking.Domain.Waitlist" />
+  </ItemGroup>
+
 </Project>

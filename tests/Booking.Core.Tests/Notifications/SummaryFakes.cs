@@ -1,6 +1,4 @@
 using Booking.Core.Admin;
-using Booking.Core.Calendar;
-using Booking.Core.Entities;
 using Booking.Core.Notifications;
 using Booking.Core.Services;
 

@@ -1,6 +1,4 @@
-using Booking.Core.Calendar;
 using Booking.Core.Data;
-using Booking.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 

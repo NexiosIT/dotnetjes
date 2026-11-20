@@ -1,4 +1,3 @@
-using Booking.Core.Entities;
 using Booking.Core.Tests.Bookings;
 using Booking.Core.Tests.Infrastructure;
 using Booking.Core.Tests.Notifications;

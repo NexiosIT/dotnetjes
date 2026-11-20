@@ -1,4 +1,4 @@
-namespace Booking.Core.Entities;
+namespace Booking.Domain.Resources;
 
 /// <summary>
 /// Where a parking spot is. Stored as text, so adding a location needs no migration:

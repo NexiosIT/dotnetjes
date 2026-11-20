@@ -1,4 +1,4 @@
-namespace Booking.Core.Entities;
+namespace Booking.Domain.Waitlist;
 
 /// <summary>A person waiting for a charger spot on one day. One entry per person per day.</summary>
 public class WaitlistEntry

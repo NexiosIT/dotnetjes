@@ -1,4 +1,3 @@
-using Booking.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Booking.Core.Data;

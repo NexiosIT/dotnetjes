@@ -25,7 +25,7 @@ namespace Booking.Core.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Booking.Core.Entities.Booking", b =>
+            modelBuilder.Entity("Booking.Domain.Bookings.Booking", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -63,7 +63,7 @@ namespace Booking.Core.Data.Migrations
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("Booking.Core.Entities.Person", b =>
+            modelBuilder.Entity("Booking.Domain.People.Person", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,7 +93,7 @@ namespace Booking.Core.Data.Migrations
                     b.ToTable("People");
                 });
 
-            modelBuilder.Entity("Booking.Core.Entities.Resource", b =>
+            modelBuilder.Entity("Booking.Domain.Resources.Resource", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -132,7 +132,7 @@ namespace Booking.Core.Data.Migrations
                     b.ToTable("Resources");
                 });
 
-            modelBuilder.Entity("Booking.Core.Entities.WaitlistEntry", b =>
+            modelBuilder.Entity("Booking.Domain.Waitlist.WaitlistEntry", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,15 +158,15 @@ namespace Booking.Core.Data.Migrations
                     b.ToTable("Waitlist", (string)null);
                 });
 
-            modelBuilder.Entity("Booking.Core.Entities.Booking", b =>
+            modelBuilder.Entity("Booking.Domain.Bookings.Booking", b =>
                 {
-                    b.HasOne("Booking.Core.Entities.Person", "Person")
+                    b.HasOne("Booking.Domain.People.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Booking.Core.Entities.Resource", "Resource")
+                    b.HasOne("Booking.Domain.Resources.Resource", "Resource")
                         .WithMany()
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -177,9 +177,9 @@ namespace Booking.Core.Data.Migrations
                     b.Navigation("Resource");
                 });
 
-            modelBuilder.Entity("Booking.Core.Entities.WaitlistEntry", b =>
+            modelBuilder.Entity("Booking.Domain.Waitlist.WaitlistEntry", b =>
                 {
-                    b.HasOne("Booking.Core.Entities.Person", "Person")
+                    b.HasOne("Booking.Domain.People.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -1,16 +1,5 @@
 namespace Booking.Core.Waitlist;
 
-public enum WaitlistError
-{
-    NotFound,
-    OutOfRange,
-    Weekend,
-    PersonInactive,
-    NoEmail,
-    AlreadyHasCharger,
-    ChargerSpotFree
-}
-
 public sealed record WaitlistResult(bool Success, WaitlistError? Error)
 {
     public static WaitlistResult Ok() => new(true, null);

@@ -1,8 +1,5 @@
 namespace Booking.Core.Waitlist;
 
-/// <summary>A charger spot lost its booking for <paramref name="Date"/>; <paramref name="FreedByPersonId"/> is who gave it up.</summary>
-public sealed record ChargerSpotFreed(DateOnly Date, int ResourceId, int FreedByPersonId);
-
 /// <summary>
 /// Told when a charger spot frees up, after the change is saved. Implementations must return at once and never throw:
 /// the emails go out in the background, so a slow mail server never holds up a Cancel or Switch.

@@ -1,5 +1,4 @@
 using Booking.Core.Data;
-using Booking.Core.Entities;
 using Booking.Core.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

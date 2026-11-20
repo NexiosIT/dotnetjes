@@ -1,4 +1,3 @@
-using Booking.Core.Calendar;
 using Booking.Core.Data;
 using Booking.Web.Components;
 using Booking.Web.Setup;

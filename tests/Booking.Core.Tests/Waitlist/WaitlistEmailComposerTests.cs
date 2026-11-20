@@ -1,4 +1,3 @@
-using Booking.Core.Entities;
 using Booking.Core.Waitlist;
 
 namespace Booking.Core.Tests.Waitlist;

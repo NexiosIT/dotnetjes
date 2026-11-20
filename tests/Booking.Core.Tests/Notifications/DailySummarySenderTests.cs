@@ -1,4 +1,3 @@
-using Booking.Core.Entities;
 using Booking.Core.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;
 

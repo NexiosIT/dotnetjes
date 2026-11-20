@@ -1,4 +1,4 @@
-namespace Booking.Core.Calendar;
+namespace Booking.Domain.Calendar;
 
 public sealed class OfficeCalendar(TimeProvider time, TimeZoneInfo zone, int maxDaysAhead) : IOfficeCalendar
 {

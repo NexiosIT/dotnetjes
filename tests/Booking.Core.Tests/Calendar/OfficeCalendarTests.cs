@@ -1,4 +1,3 @@
-using Booking.Core.Calendar;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Booking.Core.Tests.Calendar;

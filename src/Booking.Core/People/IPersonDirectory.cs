@@ -1,4 +1,3 @@
-using Booking.Core.Entities;
 
 namespace Booking.Core.People;
 

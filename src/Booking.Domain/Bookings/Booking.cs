@@ -1,4 +1,4 @@
-namespace Booking.Core.Entities;
+namespace Booking.Domain.Bookings;
 
 public class Booking
 {

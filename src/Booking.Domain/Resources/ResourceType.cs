@@ -1,4 +1,4 @@
-namespace Booking.Core.Entities;
+namespace Booking.Domain.Resources;
 
 public enum ResourceType
 {

@@ -1,4 +1,4 @@
-namespace Booking.Core.Calendar;
+namespace Booking.Domain.Calendar;
 
 /// <summary>
 /// The single source of truth for "today" and which days can be booked.

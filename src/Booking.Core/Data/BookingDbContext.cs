@@ -1,4 +1,3 @@
-using Booking.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Booking.Core.Data;
@@ -13,7 +12,7 @@ public class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbCo
 
     public DbSet<Person> People => Set<Person>();
     public DbSet<Resource> Resources => Set<Resource>();
-    public DbSet<Entities.Booking> Bookings => Set<Entities.Booking>();
+    public DbSet<Domain.Bookings.Booking> Bookings => Set<Domain.Bookings.Booking>();
     public DbSet<WaitlistEntry> Waitlist => Set<WaitlistEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,7 +27,7 @@ public class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbCo
         modelBuilder.Entity<Person>()
             .HasIndex(p => p.ExternalId).IsUnique().HasDatabaseName(PersonExternalIdIndex);
 
-        modelBuilder.Entity<Entities.Booking>(booking =>
+        modelBuilder.Entity<Domain.Bookings.Booking>(booking =>
         {
             booking.Property(b => b.ResourceType).HasConversion<string>().HasMaxLength(20);
             booking.HasIndex(b => new { b.ResourceId, b.Date }).IsUnique().HasDatabaseName(ResourceDateIndex);
