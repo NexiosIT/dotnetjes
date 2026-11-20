@@ -5,12 +5,13 @@ namespace Booking.Core.Data;
 
 public static class SeedData
 {
-    private static readonly string[] PeopleNames = ["Anna", "Ben", "Chris", "Dana", "Eli", "Fien"];
-
-    /// <summary>Adds sample desks, parking spots and people, only when the database has no people yet.</summary>
+    /// <summary>
+    /// Adds sample desks and parking spots, only when the database has no resources yet.
+    /// People aren't seeded: they're created from Keycloak on their first login.
+    /// </summary>
     public static async Task EnsureSeededAsync(BookingDbContext db, CancellationToken ct = default)
     {
-        if (await db.People.AnyAsync(ct))
+        if (await db.Resources.AnyAsync(ct))
         {
             return;
         }
@@ -34,10 +35,6 @@ public static class SeedData
                 Code = $"P{i}", Name = $"Parking {i}", Type = ResourceType.Parking,
                 Location = location, HasCharger = hasCharger
             });
-        }
-        foreach (var name in PeopleNames)
-        {
-            db.People.Add(new Person { Name = name, Email = $"{name.ToLowerInvariant()}@example.com" });
         }
 
         await db.SaveChangesAsync(ct);
