@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <TailwindSource Include="Styles/**/*.css;Components/**/*.razor" />
+    <TailwindSource Include="Styles/**/*.css;Components/**/*.razor;Components/**/*.cs" />
   </ItemGroup>
 
   <Target Name="TailwindResolveCli">

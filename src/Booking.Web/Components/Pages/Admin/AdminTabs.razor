@@ -1,32 +1,37 @@
-@* Owned by Person C. Shared header of the admin pages. *@
+@* Owned by Person C. Shared header of the admin pages: title, "Send today's summary now" and the tabs. *@
 @using Booking.Core.Notifications
 @inject DailySummarySender SummarySender
 @inject ILogger<AdminTabs> Logger
 
-<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-    <ul class="nav nav-tabs flex-grow-1">
-        <li class="nav-item">
-            <NavLink class="nav-link" href="admin/resources">Desks & parking</NavLink>
-        </li>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="admin/people">People</NavLink>
-        </li>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="admin/day">Day overview</NavLink>
-        </li>
-    </ul>
-    <div class="d-flex align-items-center gap-2">
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <h1>
+        <span class="block text-xs font-normal text-slate-400">Admin</span>
+        <span class="block text-3xl font-black tracking-tight">@Title</span>
+    </h1>
+    <div class="flex flex-wrap items-center gap-3">
         @if (summaryMessage is not null)
         {
-            <span class="@(summaryOk ? "text-success" : "text-danger")" role="status">@summaryMessage</span>
+            <span class="text-sm @(summaryOk ? "text-emerald-300" : "text-rose-300")" role="status">@summaryMessage</span>
         }
-        <button class="btn btn-outline-primary" disabled="@sending" @onclick="SendSummaryAsync">
-            @(sending ? "Sending…" : "Send today's summary now")
+        <button class="rounded-lg bg-linear-to-r from-fuchsia-500 to-cyan-500 px-4 py-2 text-sm font-semibold hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40"
+                disabled="@sending" @onclick="SendSummaryAsync">
+            @(sending ? "Sending…" : "✉ Send today's summary now")
         </button>
     </div>
 </div>
 
+<nav class="mb-6 inline-flex max-w-full flex-wrap rounded-xl bg-white/5 p-1 text-sm">
+    <NavLink href="admin/resources" class="@TabClass" ActiveClass="bg-fuchsia-500 font-semibold text-white">Desks & parking</NavLink>
+    <NavLink href="admin/people" class="@TabClass" ActiveClass="bg-fuchsia-500 font-semibold text-white">People</NavLink>
+    <NavLink href="admin/day" class="@TabClass" ActiveClass="bg-fuchsia-500 font-semibold text-white">Day overview</NavLink>
+</nav>
+
 @code {
+    private const string TabClass = "rounded-lg px-4 py-1.5 text-slate-400 hover:text-slate-200";
+
+    /// <summary>The page name shown under "Admin".</summary>
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+
     private bool sending;
     private string? summaryMessage;
     private bool summaryOk;

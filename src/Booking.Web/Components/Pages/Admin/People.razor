@@ -1,44 +1,45 @@
 @page "/admin/people"
 @* Owned by Person C — task C3. Read-only since Keycloak login: only Active can change. *@
+@using static Booking.Web.Components.Pages.Admin.AdminStyles
 @inject IAdminService Admin
 
 <PageTitle>Admin · People</PageTitle>
 
-<h1>People</h1>
+<AdminTabs Title="People" />
 
-<AdminTabs />
-
-<p class="text-muted">People appear here after their first login. Names and emails come from Keycloak.</p>
+<p class="mb-4 text-sm text-slate-400">People appear here after their first login. Names and emails come from Keycloak.</p>
 
 @if (error is not null)
 {
-    <div class="alert alert-danger" role="alert">@error</div>
+    <div class="@Error" role="alert">@error</div>
 }
 
 @if (people is null)
 {
-    <p><em>Loading…</em></p>
+    <p class="text-sm text-slate-400">Loading…</p>
 }
 else
 {
-    <table class="table align-middle">
-        <thead>
-            <tr><th>Name</th><th>Email</th><th>Active</th></tr>
-        </thead>
-        <tbody>
-            @foreach (var p in people)
-            {
-                <tr @key="p.Id" class="@(p.IsActive ? null : "text-muted")">
-                    <td>@p.Name</td>
-                    <td>@p.Email</td>
-                    <td>
-                        <input type="checkbox" class="form-check-input" checked="@p.IsActive"
-                               aria-label="Active" @onchange="() => ToggleActiveAsync(p)" />
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="@TableWrap">
+        <table class="@Table">
+            <thead class="@Head">
+                <tr><th class="@Th">Name</th><th class="@Th">Email</th><th class="@Th">Active</th></tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                @foreach (var p in people)
+                {
+                    <tr @key="p.Id" class="@(p.IsActive ? null : "text-slate-500")">
+                        <td class="@Td min-w-28 max-w-xs break-words font-semibold">@p.Name</td>
+                        <td class="@Td @(p.IsActive ? "text-slate-300" : null) min-w-56 max-w-xs break-all">@p.Email</td>
+                        <td class="@Td">
+                            <input type="checkbox" class="@Switch" checked="@p.IsActive"
+                                   aria-label="Active" @onchange="() => ToggleActiveAsync(p)" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {
