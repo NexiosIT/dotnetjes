@@ -481,3 +481,9 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 .superpowers/
+
+# Local container data (bind mounts); keep the folders, not their contents
+.container-data/*
+!.container-data/postgres/
+.container-data/postgres/*
+!.container-data/postgres/.gitkeep

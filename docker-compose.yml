@@ -16,8 +16,7 @@ services:
         condition: service_started
 
   db:
-    # Pinned: postgres:18 moved its data directory, which would break the volume below.
-    image: postgres:17
+    image: postgres:18-alpine
     environment:
       POSTGRES_DB: booking
       POSTGRES_USER: booking
@@ -25,9 +24,13 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # Postgres 18+ keeps its data in /var/lib/postgresql/18/docker, so mount the parent
+      # (mounting .../data like older versions makes the container refuse to start).
+      - ./.container-data/postgres:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
+      # Check over TCP: during first-time init Postgres runs a temporary socket-only server,
+      # which a plain pg_isready would report as ready before the app can connect.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U booking -d booking"]
       interval: 2s
       timeout: 5s
       retries: 30
@@ -39,5 +42,4 @@ services:
       - "1025:1025" # SMTP
 
 volumes:
-  pgdata:
   dpkeys:

@@ -28,7 +28,7 @@
 
 - Target framework `net10.0`. `global.json`: `{ "sdk": { "version": "10.0.100", "rollForward": "latestFeature" } }` (this machine's default SDK is 11).
 - Package versions (added **only** in the skeleton): `Microsoft.EntityFrameworkCore` 10.0.15, `Npgsql.EntityFrameworkCore.PostgreSQL` 10.0.3, `Microsoft.EntityFrameworkCore.Design` 10.0.15, `MailKit` 4.18.2, `Testcontainers.PostgreSql` 4.17.0, `Microsoft.Extensions.TimeProvider.Testing` 10.11.1; local tool `dotnet-ef` 10.0.15.
-- Postgres image `postgres:17` everywhere (compose and Testcontainers). DB `booking`, user `booking`, password `booking` (demo only).
+- Postgres image `postgres:18-alpine` everywhere (compose and Testcontainers); compose data in `.container-data/postgres` (bind mount on `/var/lib/postgresql`). DB `booking`, user `booking`, password `booking` (demo only).
 - Ports: app `8080`, Mailpit UI `8025`, Mailpit SMTP `1025`, Postgres `5432`.
 - Time zone `Europe/Brussels` (`App:TimeZone`); `Booking:MaxDaysAhead` = 14; `Summary:SendAt` = `07:00`. Weekdays only.
 - Index names: `IX_Bookings_Resource_Date`, `IX_Bookings_Person_Type_Date`, `IX_Resources_Code`.
@@ -79,7 +79,7 @@ Done when a clean clone runs `docker compose up --build` and shows the (stub) da
 **Interfaces:**
 - Produces: entities exactly per spec §5 (`Person.Email` is `string?`); `DbSet`s `People`, `Resources`, `Bookings`; contracts `IBookingService`, `DayOverview`, `ResourceSlot`, `BookingResult`, `BookingError`, `IAdminService`, `AdminValidationException` **exactly as spec §5**.
 - Produces: `static Task SeedData.EnsureSeededAsync(BookingDbContext db, CancellationToken ct = default)` — only when `People` is empty: desks `D1`–`D8` named `Desk 1`…`Desk 8`, parking `P1`–`P4` named `Parking 1`…`Parking 4`, people `Anna, Ben, Chris, Dana, Eli, Fien` with `<lowercase name>@example.com`, all active.
-- Produces (tests): `PostgresFixture : IAsyncLifetime` shared through `[CollectionDefinition("postgres")] PostgresCollection : ICollectionFixture<PostgresFixture>` — one `postgres:17` container per test run; `Task<IDbContextFactory<BookingDbContext>> CreateDatabaseAsync()` creates a uniquely named database, runs `MigrateAsync`, returns `new PooledDbContextFactory<BookingDbContext>(options)`.
+- Produces (tests): `PostgresFixture : IAsyncLifetime` shared through `[CollectionDefinition("postgres")] PostgresCollection : ICollectionFixture<PostgresFixture>` — one `postgres:18-alpine` container per test run; `Task<IDbContextFactory<BookingDbContext>> CreateDatabaseAsync()` creates a uniquely named database, runs `MigrateAsync`, returns `new PooledDbContextFactory<BookingDbContext>(options)`.
 
 - [ ] **Step 1: Write the failing tests** in `DatabaseTests` (`[Collection("postgres")]`):
 
@@ -152,7 +152,7 @@ Weekday_navigation_skips_weekend()       // NextWeekday(2026-11-20) == 2026-11-2
 
 **Interfaces:**
 - Produces: multi-stage build from `mcr.microsoft.com/dotnet/sdk:10.0` (copy `global.json`, restore + publish `src/Booking.Web/Booking.Web.csproj` only) to `mcr.microsoft.com/dotnet/aspnet:10.0`; `ASPNETCORE_HTTP_PORTS=8080`.
-- Produces: compose `app`: `build: .`, `ports: 8080:8080`, `depends_on: db: condition: service_healthy`, env `ConnectionStrings__Booking=Host=db;Port=5432;Database=booking;Username=booking;Password=booking`, `Smtp__Host=mailpit`. `db` has healthcheck `pg_isready -U booking -d booking` and volume `pgdata:/var/lib/postgresql/data`.
+- Produces: compose `app`: `build: .`, `ports: 8080:8080`, `depends_on: db: condition: service_healthy`, env `ConnectionStrings__Booking=Host=db;Port=5432;Database=booking;Username=booking;Password=booking`, `Smtp__Host=mailpit`. `db` (`postgres:18-alpine`) has TCP healthcheck `pg_isready -h 127.0.0.1 -U booking -d booking` and bind mount `./.container-data/postgres:/var/lib/postgresql`; app keys on volume `dpkeys:/keys` (`DataProtection__KeysPath=/keys`).
 
 - [ ] **Step 1: Implement** the files above.
 - [ ] **Step 2: Verify** — `docker compose up --build -d`; `curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/` → `200`; `http://localhost:8025` → Mailpit UI. `docker compose down` then `docker compose up -d` → app starts again, seed not duplicated (`select count(*) from "People"` → `6`).

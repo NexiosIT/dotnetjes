@@ -7,11 +7,11 @@ using Testcontainers.PostgreSql;
 namespace Booking.Core.Tests.Infrastructure;
 
 /// <summary>
-/// One postgres:17 container for the whole test run. Each test gets its own freshly migrated database.
+/// One postgres:18-alpine container (same image as docker-compose.yml) for the whole test run. Each test gets its own freshly migrated database.
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:17").Build();
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18-alpine").Build();
 
     public Task InitializeAsync() => _container.StartAsync();
 

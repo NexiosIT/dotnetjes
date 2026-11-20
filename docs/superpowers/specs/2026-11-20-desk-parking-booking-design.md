@@ -224,7 +224,7 @@ The skeleton contains: solution and projects; the full entity model with both na
 ### Docker details (built in the skeleton)
 - **Dockerfile:** multi-stage (`mcr.microsoft.com/dotnet/sdk:10.0` → `mcr.microsoft.com/dotnet/aspnet:10.0`), app listens on 8080.
 - **docker-compose.yml:**
-  - `db`: **`postgres:17`** (pinned — `postgres:18` moved its data directory, which would silently break the volume), named volume on `/var/lib/postgresql/data`, healthcheck, port `5432:5432` published for local development.
+  - `db`: **`postgres:18-alpine`** (team decision), data in the repo folder `.container-data/postgres` bind-mounted on `/var/lib/postgresql` (Postgres 18 keeps data in `/var/lib/postgresql/18/docker`; mounting `.../data` like older versions makes it refuse to start), healthcheck over TCP (`pg_isready -h 127.0.0.1`, so it is not fooled by the socket-only server during first-time init), port `5432:5432` published for local development.
   - `mailpit`: `axllent/mailpit`, UI on `localhost:8025`, SMTP on 1025.
   - `app`: builds the Dockerfile, `depends_on: db (service_healthy)`, port `8080:8080`, `ConnectionStrings__Booking` pointing at `db`, `Smtp__Host=mailpit`.
 - Local development: `docker compose up db mailpit`, then `dotnet run` the web project with `appsettings.Development.json` pointing at `localhost`.
