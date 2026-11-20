@@ -41,7 +41,7 @@
 
 ## Review Focus
 
-1. **Stale screen:** a user clicks **Book** on a slot someone else took seconds ago → they see "D2 was just taken — refresh to see who." and the view refreshes itself; no error page. *(B3)*
+1. **Stale screen:** a user clicks **Book** on a slot someone else took seconds ago → they see "D2 was just taken — pick another one." and the view refreshes itself: the taken slot disappears from their list; no error page. *(B3)*
 2. **Remembered user no longer valid** (deactivated, or DB reset with `docker compose down -v`) → treated as "not chosen", picker prompts again; no crash. *(B1)*
 3. **Midnight in Brussels while the container runs on UTC** → "today" follows Brussels. *(S3)*
 4. **Resource codes typed loosely** (`" d1 "` when `D1` exists) → trimmed, upper-cased, rejected as duplicate with a readable message. *(C1)*
@@ -320,7 +320,7 @@ UI tasks are verified by running the app (`docker compose up -d db mailpit` + `d
 |---|---|
 | `OutOfRange` | `That day can't be booked.` |
 | `Weekend` | `The office is closed at weekends.` |
-| `ResourceTaken` | `{Code} was just taken — refresh to see who.` |
+| `ResourceTaken` | `{Code} was just taken — pick another one.` |
 | `AlreadyBookedThatType` | `You already have a desk that day.` / `You already have a parking spot that day.` |
 | `PersonInactive` | `Your profile is inactive — ask an admin.` |
 | `ResourceInactive` | `{Code} is no longer available.` |
@@ -328,7 +328,7 @@ UI tasks are verified by running the app (`docker compose up -d db mailpit` + `d
 | `NotYourBooking` | `You can only cancel your own bookings.` |
 
 - [ ] **Step 1: Implement** — after **every** Book/Cancel (success or not) reload the overview; show the message above the columns until the next action or day change; disable buttons while a call is running (no double submit).
-- [ ] **Step 2: Verify (Review Focus 1)** — window 1 as Anna, window 2 as Ben, both on the same day. Anna books P2. Ben (stale view, P2 still "free") clicks Book on P2 → message `P2 was just taken — refresh to see who.` and the row now shows `taken by Anna`. Ben books D3 then D4 → `You already have a desk that day.` Anna cancels P2 → row shows `free [Book]`.
+- [ ] **Step 2: Verify (Review Focus 1)** — window 1 as Anna, window 2 as Ben, both on the same day. Anna books P2. Ben (stale view, P2 still "free") clicks Book on P2 → message `P2 was just taken — pick another one.` and P2 disappears from his list (spots taken by others are hidden). Ben books D3 then D4 → `You already have a desk that day.` Anna cancels P2 → row shows `free [Book]`.
 - [ ] **Step 3: Commit** — `git commit -m "feat: book and cancel from the day view"`
 
 ---
