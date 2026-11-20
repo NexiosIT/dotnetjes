@@ -55,28 +55,10 @@ public sealed class BookingService(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        // Check order: NotFound → OutOfRange → Weekend → PersonInactive → ResourceInactive.
-        var person = await db.People.AsNoTracking().SingleOrDefaultAsync(p => p.Id == personId, ct);
-        var resource = await db.Resources.AsNoTracking().SingleOrDefaultAsync(r => r.Id == resourceId, ct);
-        if (person is null || resource is null)
+        var (person, resource, error) = await CheckAsync(db, personId, resourceId, date, ct);
+        if (error is not null)
         {
-            return BookingResult.Fail(BookingError.NotFound);
-        }
-        if (date < calendar.Today || date > calendar.LastBookableDay)
-        {
-            return BookingResult.Fail(BookingError.OutOfRange);
-        }
-        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
-        {
-            return BookingResult.Fail(BookingError.Weekend);
-        }
-        if (!person.IsActive)
-        {
-            return BookingResult.Fail(BookingError.PersonInactive);
-        }
-        if (!resource.IsActive)
-        {
-            return BookingResult.Fail(BookingError.ResourceInactive);
+            return BookingResult.Fail(error.Value);
         }
 
         // Pre-checks give the normal case a clean answer...
@@ -162,6 +144,82 @@ public sealed class BookingService(
             notifier.ChargerSpotFreed(new ChargerSpotFreed(booking.Date, booking.ResourceId, personId));
         }
         return new BookingResult(true, null, null);
+    }
+
+    public async Task<BookingResult> SwitchAsync(int personId, int resourceId, DateOnly date, CancellationToken ct = default)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+
+        // Check order: Book's checks → NotFound (no booking of that type to switch from) → ResourceTaken.
+        var (person, resource, error) = await CheckAsync(db, personId, resourceId, date, ct);
+        if (error is not null)
+        {
+            return BookingResult.Fail(error.Value);
+        }
+        var old = await db.Bookings.Include(b => b.Resource)
+            .SingleOrDefaultAsync(b => b.PersonId == person.Id && b.ResourceType == resource.Type && b.Date == date, ct);
+        if (old is null)
+        {
+            return BookingResult.Fail(BookingError.NotFound);
+        }
+        if (old.ResourceId == resource.Id)
+        {
+            return BookingResult.Ok(old.Id);
+        }
+        if (await db.Bookings.AnyAsync(b => b.ResourceId == resource.Id && b.Date == date, ct))
+        {
+            return BookingResult.Fail(BookingError.ResourceTaken);
+        }
+
+        // Release the old spot and take the new one together: if the new one is lost to a simultaneous click,
+        // the unique index fails the insert and the rollback gives the old spot back.
+        var booking = new BookingEntity
+        {
+            PersonId = person.Id,
+            ResourceId = resource.Id,
+            ResourceType = resource.Type,
+            Date = date,
+            CreatedAt = time.GetUtcNow().UtcDateTime
+        };
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        db.Bookings.Remove(old);
+        await db.SaveChangesAsync(ct);
+        if (IsChargerSpot(resource))
+        {
+            await db.Waitlist.Where(w => w.PersonId == person.Id && w.Date == date).ExecuteDeleteAsync(ct);
+        }
+        db.Bookings.Add(booking);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ConflictFrom(ex) is { } conflict)
+        {
+            return BookingResult.Fail(conflict);
+        }
+        await transaction.CommitAsync(ct);
+
+        if (IsChargerSpot(old.Resource))
+        {
+            notifier.ChargerSpotFreed(new ChargerSpotFreed(date, old.ResourceId, person.Id));
+        }
+        return BookingResult.Ok(booking.Id);
+    }
+
+    /// <summary>The checks Book and Switch share. Order: NotFound → OutOfRange → Weekend → PersonInactive → ResourceInactive.</summary>
+    private async Task<(Person Person, Resource Resource, BookingError? Error)> CheckAsync(
+        BookingDbContext db, int personId, int resourceId, DateOnly date, CancellationToken ct)
+    {
+        var person = await db.People.AsNoTracking().SingleOrDefaultAsync(p => p.Id == personId, ct);
+        var resource = await db.Resources.AsNoTracking().SingleOrDefaultAsync(r => r.Id == resourceId, ct);
+        BookingError? error =
+            person is null || resource is null ? BookingError.NotFound
+            : date < calendar.Today || date > calendar.LastBookableDay ? BookingError.OutOfRange
+            : date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? BookingError.Weekend
+            : !person.IsActive ? BookingError.PersonInactive
+            : !resource.IsActive ? BookingError.ResourceInactive
+            : null;
+        return (person!, resource!, error);
     }
 
     /// <summary>The spots the waitlist is about (charger waitlist design).</summary>

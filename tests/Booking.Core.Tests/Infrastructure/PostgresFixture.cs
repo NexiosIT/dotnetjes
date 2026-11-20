@@ -11,7 +11,11 @@ namespace Booking.Core.Tests.Infrastructure;
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18-alpine").Build();
+    // Every test database has its own connection pool, whose idle connections stay open for a while:
+    // past ~100 tests the default max_connections (100) runs out ("53300: too many clients").
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18-alpine")
+        .WithCommand("-c", "max_connections=1000")
+        .Build();
 
     public Task InitializeAsync() => _container.StartAsync();
 
