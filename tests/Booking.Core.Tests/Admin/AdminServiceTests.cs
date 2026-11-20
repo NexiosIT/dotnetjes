@@ -91,36 +91,24 @@ public sealed class AdminServiceTests(PostgresFixture postgres)
         var resource = await Assert.ThrowsAsync<AdminValidationException>(
             () => service.UpdateResourceAsync(9999, "X1", "X", true));
         var person = await Assert.ThrowsAsync<AdminValidationException>(
-            () => service.UpdatePersonAsync(9999, "X", null, true));
+            () => service.SetPersonActiveAsync(9999, true));
 
         Assert.Equal("That item no longer exists.", resource.Message);
         Assert.Equal("That item no longer exists.", person.Message);
     }
 
     [Fact]
-    public async Task AddPerson_validates_email()
-    {
-        var service = await CreateAsync();
-
-        var ex = await Assert.ThrowsAsync<AdminValidationException>(
-            () => service.AddPersonAsync("Gert", "gert"));
-        var added = await service.AddPersonAsync("Gert", "");
-
-        Assert.Equal("Email must contain '@'.", ex.Message);
-        var stored = (await service.GetPeopleAsync()).Single(p => p.Id == added.Id);
-        Assert.Null(stored.Email);
-    }
-
-    [Fact]
-    public async Task UpdatePerson_accepts_null_email()
+    public async Task SetPersonActive_toggles_only_active()
     {
         var service = await CreateAsync();
         var dana = (await service.GetPeopleAsync()).Single(p => p.Name == "Dana");
 
-        await service.UpdatePersonAsync(dana.Id, "Dana", null, true);
+        await service.SetPersonActiveAsync(dana.Id, false);
 
         var stored = (await service.GetPeopleAsync()).Single(p => p.Id == dana.Id);
-        Assert.Null(stored.Email);
+        Assert.False(stored.IsActive);
+        Assert.Equal("Dana", stored.Name);
+        Assert.Equal("dana@example.com", stored.Email);
     }
 
     [Fact]

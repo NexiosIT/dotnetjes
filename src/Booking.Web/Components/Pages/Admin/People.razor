@@ -1,5 +1,5 @@
 @page "/admin/people"
-@* Owned by Person C — task C3. *@
+@* Owned by Person C — task C3. Read-only since Keycloak login: only Active can change. *@
 @inject IAdminService Admin
 
 <PageTitle>Admin · People</PageTitle>
@@ -8,19 +8,7 @@
 
 <AdminTabs />
 
-<form class="row g-2 align-items-end mb-3" @onsubmit="AddAsync">
-    <div class="col-auto">
-        <label class="form-label" for="new-name">Name</label>
-        <input id="new-name" class="form-control" @bind="newName" placeholder="Gert" />
-    </div>
-    <div class="col-auto">
-        <label class="form-label" for="new-email">Email (optional)</label>
-        <input id="new-email" type="text" class="form-control" @bind="newEmail" placeholder="gert@example.com" />
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Add</button>
-    </div>
-</form>
+<p class="text-muted">People appear here after their first login. Names and emails come from Keycloak.</p>
 
 @if (error is not null)
 {
@@ -35,36 +23,17 @@ else
 {
     <table class="table align-middle">
         <thead>
-            <tr><th>Name</th><th>Email</th><th>Active</th><th></th></tr>
+            <tr><th>Name</th><th>Email</th><th>Active</th></tr>
         </thead>
         <tbody>
             @foreach (var p in people)
             {
                 <tr @key="p.Id" class="@(p.IsActive ? null : "text-muted")">
-                    @if (editingId == p.Id)
-                    {
-                        <td><input class="form-control form-control-sm" @bind="editName" aria-label="Name" /></td>
-                        <td><input class="form-control form-control-sm" @bind="editEmail" aria-label="Email" /></td>
-                    }
-                    else
-                    {
-                        <td>@p.Name</td>
-                        <td>@p.Email</td>
-                    }
+                    <td>@p.Name</td>
+                    <td>@p.Email</td>
                     <td>
                         <input type="checkbox" class="form-check-input" checked="@p.IsActive"
                                aria-label="Active" @onchange="() => ToggleActiveAsync(p)" />
-                    </td>
-                    <td class="text-end">
-                        @if (editingId == p.Id)
-                        {
-                            <button class="btn btn-sm btn-primary" @onclick="() => SaveEditAsync(p)">Save</button>
-                            <button class="btn btn-sm btn-link" @onclick="CancelEdit">Cancel</button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEdit(p)">Edit</button>
-                        }
                     </td>
                 </tr>
             }
@@ -76,42 +45,12 @@ else
     private IReadOnlyList<Person>? people;
     private string? error;
 
-    private string newName = "";
-    private string newEmail = "";
-
-    private int? editingId;
-    private string editName = "";
-    private string editEmail = "";
-
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync() => people = await Admin.GetPeopleAsync();
 
-    private Task AddAsync() => RunAsync(async () =>
-    {
-        await Admin.AddPersonAsync(newName, newEmail);
-        newName = "";
-        newEmail = "";
-    });
-
-    private void StartEdit(Person p)
-    {
-        editingId = p.Id;
-        editName = p.Name;
-        editEmail = p.Email ?? "";
-        error = null;
-    }
-
-    private void CancelEdit() => editingId = null;
-
-    private Task SaveEditAsync(Person p) => RunAsync(async () =>
-    {
-        await Admin.UpdatePersonAsync(p.Id, editName, editEmail, p.IsActive);
-        editingId = null;
-    });
-
     private Task ToggleActiveAsync(Person p) =>
-        RunAsync(() => Admin.UpdatePersonAsync(p.Id, p.Name, p.Email, !p.IsActive));
+        RunAsync(() => Admin.SetPersonActiveAsync(p.Id, !p.IsActive));
 
     /// <summary>Runs an admin change, shows a validation message if it was refused, and reloads the table either way.</summary>
     private async Task RunAsync(Func<Task> change)

@@ -58,26 +58,11 @@ public sealed class AdminService(IDbContextFactory<BookingDbContext> dbFactory) 
             .ToListAsync(ct);
     }
 
-    public async Task<Person> AddPersonAsync(string name, string? email, CancellationToken ct = default)
+    public async Task SetPersonActiveAsync(int id, bool isActive, CancellationToken ct = default)
     {
-        var person = new Person { Name = Required(name, "Name"), Email = NormalizeEmail(email) };
-
-        await using var db = await dbFactory.CreateDbContextAsync(ct);
-        db.People.Add(person);
-        await db.SaveChangesAsync(ct);
-        return person;
-    }
-
-    public async Task UpdatePersonAsync(int id, string name, string? email, bool isActive, CancellationToken ct = default)
-    {
-        var trimmedName = Required(name, "Name");
-        var normalizedEmail = NormalizeEmail(email);
-
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var person = await db.People.SingleOrDefaultAsync(p => p.Id == id, ct) ?? throw Gone();
 
-        person.Name = trimmedName;
-        person.Email = normalizedEmail;
         person.IsActive = isActive;
         await db.SaveChangesAsync(ct);
     }
@@ -90,20 +75,6 @@ public sealed class AdminService(IDbContextFactory<BookingDbContext> dbFactory) 
         if (string.IsNullOrEmpty(trimmed))
         {
             throw new AdminValidationException($"{field} is required.");
-        }
-        return trimmed;
-    }
-
-    private static string? NormalizeEmail(string? email)
-    {
-        var trimmed = email?.Trim();
-        if (string.IsNullOrEmpty(trimmed))
-        {
-            return null;
-        }
-        if (!trimmed.Contains('@'))
-        {
-            throw new AdminValidationException("Email must contain '@'.");
         }
         return trimmed;
     }

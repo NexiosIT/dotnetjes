@@ -4,7 +4,7 @@ namespace Booking.Core.Admin;
 
 /// <summary>
 /// Invalid input throws <see cref="AdminValidationException"/> with a message fit to show the user.
-/// Email is optional: null or blank is stored as null.
+/// People are created from Keycloak on first login (see <c>IPersonDirectory</c>); admins can only activate or deactivate them.
 /// </summary>
 public interface IAdminService
 {
@@ -12,6 +12,5 @@ public interface IAdminService
     Task<Resource> AddResourceAsync(string code, string name, ResourceType type, CancellationToken ct = default);
     Task UpdateResourceAsync(int id, string code, string name, bool isActive, CancellationToken ct = default);
     Task<IReadOnlyList<Person>> GetPeopleAsync(CancellationToken ct = default);
-    Task<Person> AddPersonAsync(string name, string? email, CancellationToken ct = default);
-    Task UpdatePersonAsync(int id, string name, string? email, bool isActive, CancellationToken ct = default);
+    Task SetPersonActiveAsync(int id, bool isActive, CancellationToken ct = default);
 }
