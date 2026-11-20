@@ -2,6 +2,7 @@ using Booking.Core.Calendar;
 using Booking.Core.Data;
 using Booking.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using BookingEntity = Booking.Core.Entities.Booking;
 
 namespace Booking.Core.Services;
@@ -76,6 +77,16 @@ public sealed class BookingService(
             return BookingResult.Fail(BookingError.ResourceInactive);
         }
 
+        // Pre-checks give the normal case a clean answer...
+        if (await db.Bookings.AnyAsync(b => b.ResourceId == resource.Id && b.Date == date, ct))
+        {
+            return BookingResult.Fail(BookingError.ResourceTaken);
+        }
+        if (await db.Bookings.AnyAsync(b => b.PersonId == person.Id && b.ResourceType == resource.Type && b.Date == date, ct))
+        {
+            return BookingResult.Fail(BookingError.AlreadyBookedThatType);
+        }
+
         var booking = new BookingEntity
         {
             PersonId = person.Id,
@@ -85,10 +96,28 @@ public sealed class BookingService(
             CreatedAt = time.GetUtcNow().UtcDateTime
         };
         db.Bookings.Add(booking);
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ConflictFrom(ex) is { } conflict)
+        {
+            // ...and the unique indexes decide simultaneous clicks that both passed the pre-checks.
+            return BookingResult.Fail(conflict);
+        }
 
         return BookingResult.Ok(booking.Id);
     }
+
+    private static BookingError? ConflictFrom(DbUpdateException ex) =>
+        ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pg
+            ? pg.ConstraintName switch
+            {
+                BookingDbContext.ResourceDateIndex => BookingError.ResourceTaken,
+                BookingDbContext.PersonTypeDateIndex => BookingError.AlreadyBookedThatType,
+                _ => null
+            }
+            : null;
 
     public Task<BookingResult> CancelAsync(int personId, int bookingId, CancellationToken ct = default) =>
         throw new NotImplementedException("Task A4");
