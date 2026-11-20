@@ -1,0 +1,96 @@
+<Project>
+  <!--
+    Compiles Styles/app.css into wwwroot/app.css with the Tailwind standalone CLI (no Node needed).
+    The CLI for this machine is downloaded once into obj/tailwind/<version>/ and checked against the release's
+    published SHA-256 before it is used. Pass /p:TailwindCli=<path> to use a CLI that is already installed.
+    Runs in dotnet build/run/publish, in the IDE and in the Docker SDK stage.
+    Hot reload doesn't run MSBuild: after adding new Tailwind classes, rebuild to get their CSS.
+  -->
+  <PropertyGroup>
+    <TailwindVersion>4.3.4</TailwindVersion>
+    <TailwindDir>$(MSBuildProjectDirectory)/$(BaseIntermediateOutputPath)tailwind/$(TailwindVersion)/</TailwindDir>
+    <TailwindInput>$(MSBuildProjectDirectory)/Styles/app.css</TailwindInput>
+    <TailwindOutput>$(MSBuildProjectDirectory)/wwwroot/app.css</TailwindOutput>
+    <!-- Changes (and so triggers a rebuild of the CSS) when the configuration switches, e.g. Debug → Release (minified). -->
+    <TailwindConfigStamp>$(MSBuildProjectDirectory)/$(BaseIntermediateOutputPath)tailwind/configuration.txt</TailwindConfigStamp>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TailwindSource Include="Styles/**/*.css;Components/**/*.razor;Components/**/*.cs" />
+    <TailwindSource Include="$(MSBuildThisFileFullPath);$(TailwindConfigStamp)" />
+
+    <!-- Visual Studio's fast up-to-date check: a stylesheet-only edit must still trigger a build. -->
+    <UpToDateCheckInput Include="Styles/**/*.css" />
+    <UpToDateCheckBuilt Include="wwwroot/app.css" Original="Styles/app.css" />
+  </ItemGroup>
+
+  <Target Name="TailwindResolveCli">
+    <PropertyGroup>
+      <_TailwindArch>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_TailwindArch>
+      <!-- SHA-256 values from the release's sha256sums.txt. -->
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('Windows')) And '$(_TailwindArch)' == 'X64'">tailwindcss-windows-x64.exe</TailwindAsset>
+      <_TailwindSha256 Condition="'$(TailwindAsset)' == 'tailwindcss-windows-x64.exe'">ad84612696f3be102fa005d4827f0df84c7b4570d31c06865ce5fde0311478af</_TailwindSha256>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(_TailwindArch)' == 'X64'">tailwindcss-linux-x64</TailwindAsset>
+      <_TailwindSha256 Condition="'$(TailwindAsset)' == 'tailwindcss-linux-x64'">149a8ece5b855587a9c10de6da9dcbcfad0e47c4ed5dca219f721b3eae39d817</_TailwindSha256>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(_TailwindArch)' == 'Arm64'">tailwindcss-linux-arm64</TailwindAsset>
+      <_TailwindSha256 Condition="'$(TailwindAsset)' == 'tailwindcss-linux-arm64'">f6d7baae1d350ed3a2defe98d0b5cc58e37400c0173b2e38d42f690ccc4bbfe1</_TailwindSha256>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(_TailwindArch)' == 'X64'">tailwindcss-macos-x64</TailwindAsset>
+      <_TailwindSha256 Condition="'$(TailwindAsset)' == 'tailwindcss-macos-x64'">7ec771593a1fb8bbd204f70429361b0158f7989e4136bc68d04513bf543a15ba</_TailwindSha256>
+      <TailwindAsset Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(_TailwindArch)' == 'Arm64'">tailwindcss-macos-arm64</TailwindAsset>
+      <_TailwindSha256 Condition="'$(TailwindAsset)' == 'tailwindcss-macos-arm64'">a516a11b439bfbb5ecd4a2d13b75e6cdcc284dc710aed8731e31d2e5c03895a4</_TailwindSha256>
+
+      <_TailwindDownload Condition="'$(TailwindCli)' == ''">true</_TailwindDownload>
+      <TailwindCli Condition="'$(TailwindCli)' == ''">$(TailwindDir)$(TailwindAsset)</TailwindCli>
+      <_TailwindTemp>$(TailwindDir)download/</_TailwindTemp>
+    </PropertyGroup>
+
+    <Error Condition="'$(_TailwindDownload)' == 'true' And '$(TailwindAsset)' == ''"
+           Text="Tailwind: no standalone CLI for $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription) ($(_TailwindArch)). Supported: Windows x64, Linux x64/arm64, macOS x64/arm64. Or pass /p:TailwindCli=&lt;path to tailwindcss&gt;." />
+    <Error Condition="'$(_TailwindDownload)' != 'true' And !Exists('$(TailwindCli)')" Text="Tailwind: TailwindCli '$(TailwindCli)' does not exist." />
+
+    <!-- Download next to the final path and move it in only once the hash checks out, so an interrupted or tampered download is never used. -->
+    <DownloadFile Condition="'$(_TailwindDownload)' == 'true' And !Exists('$(TailwindCli)')"
+                  SourceUrl="https://github.com/tailwindlabs/tailwindcss/releases/download/v$(TailwindVersion)/$(TailwindAsset)"
+                  DestinationFolder="$(_TailwindTemp)" />
+    <GetFileHash Condition="'$(_TailwindDownload)' == 'true' And !Exists('$(TailwindCli)')" Files="$(_TailwindTemp)$(TailwindAsset)" Algorithm="SHA256">
+      <Output TaskParameter="Hash" PropertyName="_TailwindActualSha256" />
+    </GetFileHash>
+    <Delete Condition="'$(_TailwindActualSha256)' != '' And '$(_TailwindActualSha256.ToLowerInvariant())' != '$(_TailwindSha256)'" Files="$(_TailwindTemp)$(TailwindAsset)" />
+    <Error Condition="'$(_TailwindActualSha256)' != '' And '$(_TailwindActualSha256.ToLowerInvariant())' != '$(_TailwindSha256)'"
+           Text="Tailwind: $(TailwindAsset) has SHA-256 $(_TailwindActualSha256), expected $(_TailwindSha256). The download was deleted; build again to retry." />
+    <Move Condition="'$(_TailwindActualSha256)' != ''" SourceFiles="$(_TailwindTemp)$(TailwindAsset)" DestinationFiles="$(TailwindCli)" />
+    <Exec Condition="'$(_TailwindActualSha256)' != '' And !$([MSBuild]::IsOSPlatform('Windows'))" Command="chmod +x &quot;$(TailwindCli)&quot;" />
+  </Target>
+
+  <Target Name="TailwindStampConfiguration" Condition="'$(DesignTimeBuild)' != 'true'">
+    <WriteLinesToFile File="$(TailwindConfigStamp)" Lines="$(Configuration)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+  <!-- Skipped when wwwroot/app.css is newer than every input (including this file and the configuration stamp). -->
+  <Target Name="TailwindBuild"
+          DependsOnTargets="TailwindStampConfiguration;TailwindResolveCli"
+          Inputs="@(TailwindSource)"
+          Outputs="$(TailwindOutput)"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_TailwindMinify Condition="'$(Configuration)' == 'Release'">--minify</_TailwindMinify>
+    </PropertyGroup>
+    <Exec Command="&quot;$(TailwindCli)&quot; -i &quot;$(TailwindInput)&quot; -o &quot;$(TailwindOutput)&quot; $(_TailwindMinify)"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <!--
+    Always runs (even when TailwindBuild was skipped): on a clean clone wwwroot/app.css did not exist when the
+    project was evaluated, so it is missing from Content and static web assets would never serve it.
+  -->
+  <Target Name="TailwindIncludeOutput" BeforeTargets="BeforeBuild"
+          DependsOnTargets="TailwindBuild" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_TailwindOutputFull>$([System.IO.Path]::GetFullPath('$(TailwindOutput)'))</_TailwindOutputFull>
+    </PropertyGroup>
+    <ItemGroup>
+      <_TailwindOutputInContent Include="@(Content)" Condition="'%(FullPath)' == '$(_TailwindOutputFull)'" />
+      <Content Include="wwwroot\app.css" CopyToPublishDirectory="PreserveNewest" Condition="'@(_TailwindOutputInContent)' == ''" />
+    </ItemGroup>
+  </Target>
+</Project>

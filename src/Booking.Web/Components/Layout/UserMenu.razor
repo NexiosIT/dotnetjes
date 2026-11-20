@@ -1,11 +1,15 @@
 @using Booking.Web.Auth
 
 <AuthorizeView>
-    <div class="d-flex align-items-center gap-2">
-        <span>@KeycloakClaims.Read(context.User)?.Name</span>
+    @{ var name = KeycloakClaims.Read(context.User)?.Name ?? ""; }
+    <div class="user-menu flex shrink-0 items-center gap-2">
+        @* Phones show the initial only, so the menu fits beside Book and Admin. *@
+        <span class="grid h-7 w-7 place-items-center rounded-full bg-linear-to-br from-fuchsia-500 to-cyan-500 text-xs font-bold sm:hidden"
+              title="@name" aria-label="@name">@(name.Length > 0 ? char.ToUpperInvariant(name[0]) : '?')</span>
+        <span class="hidden max-w-48 truncate rounded-full bg-white/10 px-3 py-1 text-sm sm:inline-block" title="@name">@name</span>
         <form method="post" action="logout">
             <AntiforgeryToken />
-            <button type="submit" class="btn btn-outline-secondary btn-sm">Log out</button>
+            <button type="submit" class="rounded-lg px-2.5 py-1 text-sm text-slate-400 ring-1 ring-white/15 hover:bg-white/10 hover:text-slate-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-fuchsia-400">Log out</button>
         </form>
     </div>
 </AuthorizeView>

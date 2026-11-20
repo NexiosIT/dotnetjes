@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin – Dark & bold</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+<div class="max-w-5xl mx-auto px-6 py-8">
+  <h1 class="text-2xl font-bold">Admin pages in Dark &amp; bold</h1>
+  <p class="text-slate-500 mt-1 mb-6">Same style as the Book page you picked. Shown: Desks &amp; parking, with a validation message and the summary button after a send.</p>
+
+  <div class="rounded-2xl shadow-xl overflow-hidden bg-slate-950 text-slate-100 ring-1 ring-slate-800">
+    <!-- top bar, shared by every page -->
+    <div class="flex items-center justify-between px-6 py-3 border-b border-white/10">
+      <div class="flex items-center gap-6">
+        <span class="font-semibold bg-gradient-to-r from-fuchsia-400 to-cyan-300 bg-clip-text text-transparent">desk&amp;parking</span>
+        <nav class="flex gap-1 text-sm">
+          <span class="px-3 py-1.5 rounded-lg text-slate-400">Book</span>
+          <span class="px-3 py-1.5 rounded-lg bg-white/10 text-white">Admin</span>
+        </nav>
+      </div>
+      <span class="rounded-full bg-white/10 px-3 py-1 text-sm">Anna ▾</span>
+    </div>
+
+    <div class="p-6">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+          <div class="text-xs text-slate-400">Admin</div>
+          <div class="text-3xl font-black tracking-tight">Desks &amp; parking</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-emerald-300">✓ Sent 6 emails.</span>
+          <button class="rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-500 px-4 py-2 text-sm font-semibold">✉ Send today's summary now</button>
+        </div>
+      </div>
+
+      <!-- tabs -->
+      <div class="inline-flex rounded-xl bg-white/5 p-1 mb-6 text-sm">
+        <span class="rounded-lg bg-fuchsia-500 px-4 py-1.5 font-semibold">Desks &amp; parking</span>
+        <span class="rounded-lg px-4 py-1.5 text-slate-400">People</span>
+      </div>
+
+      <!-- add form -->
+      <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-4 mb-4 flex flex-wrap items-end gap-3 text-sm">
+        <label class="flex flex-col gap-1"><span class="text-xs text-slate-400">Code</span><input class="w-24 rounded-lg bg-slate-900 ring-1 ring-white/10 px-3 py-2" value="d9"></label>
+        <label class="flex flex-col gap-1"><span class="text-xs text-slate-400">Name</span><input class="w-48 rounded-lg bg-slate-900 ring-1 ring-white/10 px-3 py-2" value="Desk 9"></label>
+        <label class="flex flex-col gap-1"><span class="text-xs text-slate-400">Type</span><select class="rounded-lg bg-slate-900 ring-1 ring-white/10 px-3 py-2"><option>Desk</option></select></label>
+        <button class="rounded-lg bg-fuchsia-500 px-4 py-2 font-semibold">Add</button>
+      </div>
+
+      <div class="rounded-xl bg-rose-500/10 ring-1 ring-rose-500/30 text-rose-200 px-4 py-2.5 mb-4 text-sm">A resource with code D9 already exists.</div>
+
+      <!-- table -->
+      <div class="rounded-xl bg-white/5 overflow-hidden text-sm">
+        <table class="w-full">
+          <thead class="text-xs uppercase tracking-wider text-slate-500 border-b border-white/10">
+            <tr><th class="text-left px-4 py-2">Code</th><th class="text-left px-4 py-2">Name</th><th class="text-left px-4 py-2">Type</th><th class="text-left px-4 py-2">Active</th><th></th></tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            <tr><td class="px-4 py-2.5 font-bold">D1</td><td class="px-4 text-slate-300">Desk 1</td><td class="px-4"><span class="rounded-full bg-fuchsia-500/15 text-fuchsia-300 px-2 text-xs">Desk</span></td>
+                <td class="px-4"><span class="inline-flex h-5 w-9 items-center rounded-full bg-emerald-500 px-0.5"><span class="h-4 w-4 rounded-full bg-white ml-auto"></span></span></td>
+                <td class="px-4 text-right"><button class="rounded-lg ring-1 ring-white/20 px-3 py-1 text-xs">Edit</button></td></tr>
+            <tr class="bg-fuchsia-500/10"><td class="px-4 py-2"><input class="w-20 rounded-lg bg-slate-900 ring-1 ring-fuchsia-400/50 px-2 py-1" value="D2"></td><td class="px-4"><input class="w-40 rounded-lg bg-slate-900 ring-1 ring-fuchsia-400/50 px-2 py-1" value="Desk 2 (window)"></td><td class="px-4"><span class="rounded-full bg-fuchsia-500/15 text-fuchsia-300 px-2 text-xs">Desk</span></td>
+                <td class="px-4"><span class="inline-flex h-5 w-9 items-center rounded-full bg-emerald-500 px-0.5"><span class="h-4 w-4 rounded-full bg-white ml-auto"></span></span></td>
+                <td class="px-4 text-right whitespace-nowrap"><button class="rounded-lg bg-fuchsia-500 px-3 py-1 text-xs font-semibold">Save</button> <button class="px-2 text-xs text-slate-400">Cancel</button></td></tr>
+            <tr><td class="px-4 py-2.5 font-bold">P3</td><td class="px-4 text-slate-300">Parking 3</td><td class="px-4"><span class="rounded-full bg-cyan-500/15 text-cyan-300 px-2 text-xs">Parking</span></td>
+                <td class="px-4"><span class="inline-flex h-5 w-9 items-center rounded-full bg-emerald-500 px-0.5"><span class="h-4 w-4 rounded-full bg-white ml-auto"></span></span></td>
+                <td class="px-4 text-right"><button class="rounded-lg ring-1 ring-white/20 px-3 py-1 text-xs">Edit</button></td></tr>
+            <tr class="text-slate-500"><td class="px-4 py-2.5 font-bold">P4</td><td class="px-4">Parking 4</td><td class="px-4"><span class="rounded-full bg-white/5 px-2 text-xs">Parking</span></td>
+                <td class="px-4"><span class="inline-flex h-5 w-9 items-center rounded-full bg-slate-700 px-0.5"><span class="h-4 w-4 rounded-full bg-slate-400"></span></span></td>
+                <td class="px-4 text-right"><button class="rounded-lg ring-1 ring-white/10 px-3 py-1 text-xs">Edit</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-slate-500 mt-3">People tab: same layout with Name · Email · Active.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

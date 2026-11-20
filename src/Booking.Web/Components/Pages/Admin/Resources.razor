@@ -1,105 +1,109 @@
 @page "/admin/resources"
 @* Owned by Person C — task C2. *@
+@using static Booking.Web.Components.Pages.Admin.AdminStyles
 @inject IAdminService Admin
 
 <PageTitle>Admin · Desks & parking</PageTitle>
 
-<h1>Desks & parking</h1>
+<AdminTabs Title="Desks & parking" />
 
-<AdminTabs />
-
-<form class="row g-2 align-items-end mb-3" @onsubmit="AddAsync">
-    <div class="col-auto">
-        <label class="form-label" for="new-code">Code</label>
-        <input id="new-code" class="form-control" @bind="newCode" placeholder="D9" />
-    </div>
-    <div class="col-auto">
-        <label class="form-label" for="new-name">Name</label>
-        <input id="new-name" class="form-control" @bind="newName" placeholder="Desk 9" />
-    </div>
-    <div class="col-auto">
-        <label class="form-label" for="new-type">Type</label>
-        <select id="new-type" class="form-select" @bind="newType">
+<form class="@Panel" @onsubmit="AddAsync">
+    <label class="@Label" for="new-code">
+        <span class="@LabelText">Code</span>
+        <input id="new-code" class="@Input w-24" @bind="newCode" placeholder="D9" />
+    </label>
+    <label class="@Label" for="new-name">
+        <span class="@LabelText">Name</span>
+        <input id="new-name" class="@Input w-48" @bind="newName" placeholder="Desk 9" />
+    </label>
+    <label class="@Label" for="new-type">
+        <span class="@LabelText">Type</span>
+        <select id="new-type" class="@Input" @bind="newType">
             <option value="@ResourceType.Desk">Desk</option>
             <option value="@ResourceType.Parking">Parking</option>
         </select>
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Add</button>
-    </div>
+    </label>
+    <button type="submit" class="@Primary">Add</button>
 </form>
 
 @if (error is not null)
 {
-    <div class="alert alert-danger" role="alert">@error</div>
+    <div class="@Error" role="alert">@error</div>
 }
 
 @if (resources is null)
 {
-    <p><em>Loading…</em></p>
+    <p class="text-sm text-slate-400">Loading…</p>
 }
 else
 {
-    <table class="table align-middle">
-        <thead>
-            <tr><th>Code</th><th>Name</th><th>Type</th><th>Location</th><th>Charger</th><th>Active</th><th></th></tr>
-        </thead>
-        <tbody>
-            @foreach (var r in resources)
-            {
-                <tr @key="r.Id" class="@(r.IsActive ? null : "text-muted")">
-                    @if (editingId == r.Id)
-                    {
-                        <td><input class="form-control form-control-sm" @bind="editCode" aria-label="Code" /></td>
-                        <td><input class="form-control form-control-sm" @bind="editName" aria-label="Name" /></td>
-                    }
-                    else
-                    {
-                        <td>@r.Code</td>
-                        <td>@r.Name</td>
-                    }
-                    <td>@r.Type</td>
-                    @if (r.Type == ResourceType.Parking)
-                    {
-                        <td>
-                            <select class="form-select form-select-sm" aria-label="Location"
-                                    value="@(r.Location?.ToString() ?? "")" @onchange="e => SetLocationAsync(r, e.Value as string)">
-                                <option value="">— not set —</option>
-                                @foreach (var location in ParkingLocations.All)
-                                {
-                                    <option value="@location">@ParkingLocations.Label(location)</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <input type="checkbox" class="form-check-input" checked="@r.HasCharger"
-                                   aria-label="EV charger" @onchange="() => ToggleChargerAsync(r)" />
-                        </td>
-                    }
-                    else
-                    {
-                        <td class="text-muted">—</td>
-                        <td class="text-muted">—</td>
-                    }
-                    <td>
-                        <input type="checkbox" class="form-check-input" checked="@r.IsActive"
-                               aria-label="Active" @onchange="() => ToggleActiveAsync(r)" />
-                    </td>
-                    <td class="text-end">
+    <div class="@TableWrap">
+        <table class="@Table">
+            <thead class="@Head">
+                <tr>
+                    <th class="@Th">Code</th><th class="@Th">Name</th><th class="@Th">Type</th><th class="@Th">Location</th>
+                    <th class="@Th">Charger</th><th class="@Th">Active</th><th class="@Th"><span class="sr-only">Actions</span></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                @foreach (var r in resources)
+                {
+                    <tr @key="r.Id" class="@(editingId == r.Id ? "bg-fuchsia-500/10" : r.IsActive ? null : "text-slate-500")">
                         @if (editingId == r.Id)
                         {
-                            <button class="btn btn-sm btn-primary" @onclick="() => SaveEditAsync(r)">Save</button>
-                            <button class="btn btn-sm btn-link" @onclick="CancelEdit">Cancel</button>
+                            <td class="px-4 py-2"><input class="@CellInput" @bind="editCode" aria-label="Code" /></td>
+                            <td class="px-4 py-2"><input class="@CellInput" @bind="editName" aria-label="Name" /></td>
                         }
                         else
                         {
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEdit(r)">Edit</button>
+                            <td class="@Td font-bold">@r.Code</td>
+                            <td class="@Td @(r.IsActive ? "text-slate-300" : null) min-w-32 max-w-xs wrap-anywhere">@r.Name</td>
                         }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                        <td class="@Td">
+                            <span class="rounded-full px-2 text-xs @(r.Type == ResourceType.Desk ? "bg-fuchsia-500/15 text-fuchsia-300" : "bg-cyan-500/15 text-cyan-300")">@r.Type</span>
+                        </td>
+                        @if (r.Type == ResourceType.Parking)
+                        {
+                            <td class="px-4 py-2">
+                                <select class="@CellSelect" aria-label="Location"
+                                        value="@(r.Location?.ToString() ?? "")" @onchange="e => SetLocationAsync(r, e.Value as string)">
+                                    <option value="">— not set —</option>
+                                    @foreach (var location in ParkingLocations.All)
+                                    {
+                                        <option value="@location">@ParkingLocations.Label(location)</option>
+                                    }
+                                </select>
+                            </td>
+                            <td class="@Td">
+                                <input type="checkbox" class="@Switch" checked="@r.HasCharger"
+                                       aria-label="EV charger" @onchange="() => ToggleChargerAsync(r)" />
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="@Td text-slate-600">—</td>
+                            <td class="@Td text-slate-600">—</td>
+                        }
+                        <td class="@Td">
+                            <input type="checkbox" class="@Switch" checked="@r.IsActive"
+                                   aria-label="Active" @onchange="() => ToggleActiveAsync(r)" />
+                        </td>
+                        <td class="@Td whitespace-nowrap text-right">
+                            @if (editingId == r.Id)
+                            {
+                                <button class="@SmallPrimary" @onclick="() => SaveEditAsync(r)">Save</button>
+                                <button class="@SmallLink" @onclick="CancelEdit">Cancel</button>
+                            }
+                            else
+                            {
+                                <button class="@SmallSecondary" @onclick="() => StartEdit(r)">Edit</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

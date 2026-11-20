@@ -6,50 +6,55 @@
 
 <PageTitle>Admin · Day overview</PageTitle>
 
-<h1>Day overview</h1>
+<AdminTabs Title="Day overview" />
 
-<AdminTabs />
-
-<div class="d-flex align-items-center gap-2 mb-3">
-    <h2 class="h4 mb-0 me-2">@_date.ToString("ddd d MMM", CultureInfo.InvariantCulture)</h2>
-    <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Previous day" @onclick="GoBack">◀</button>
-    <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Next day" @onclick="GoForward">▶</button>
-    <button type="button" class="btn btn-link btn-sm" @onclick="GoToday">Today</button>
+<div class="mb-5 flex items-end justify-between gap-4">
+    <h2>
+        <span class="block text-xs font-normal text-slate-400">@_date.ToString("dddd", CultureInfo.InvariantCulture)</span>
+        <span class="block text-2xl font-black tracking-tight">@_date.ToString("d MMM", CultureInfo.InvariantCulture)</span>
+    </h2>
+    <div class="flex items-center gap-2">
+        <button type="button" class="@ArrowClass" aria-label="Previous day" @onclick="GoBack">‹</button>
+        <button type="button" class="@ArrowClass" aria-label="Next day" @onclick="GoForward">›</button>
+        <button type="button" class="rounded-lg px-3 py-1.5 text-sm text-fuchsia-300 hover:bg-white/5" @onclick="GoToday">Today</button>
+    </div>
 </div>
 
 @if (_day is null)
 {
-    <p>Loading…</p>
+    <p class="text-sm text-slate-400">Loading…</p>
 }
 else
 {
-    <div class="row g-4">
-        <div class="col-md-6">
-            <h3 class="h6 text-uppercase">Desks · @Booked(_day.Desks) of @_day.Desks.Count booked</h3>
-            <ul class="list-group">
+    <div class="grid gap-6 md:grid-cols-2">
+        <section class="min-w-0">
+            <h3 class="mb-2 text-xs uppercase tracking-wider text-slate-500">Desks · @Booked(_day.Desks) of @_day.Desks.Count booked</h3>
+            <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/5">
                 @foreach (var slot in _day.Desks)
                 {
-                    <SlotRow @key="slot.ResourceId" Slot="slot" ReadOnly="true" />
+                    <SlotRow @key="slot.ResourceId" Slot="slot" Accent="fuchsia" ReadOnly="true" />
                 }
             </ul>
-        </div>
-        <div class="col-md-6">
-            <h3 class="h6 text-uppercase">Parking · @Booked(_day.Parking) of @_day.Parking.Count booked</h3>
-            <ul class="list-group">
+        </section>
+        <section class="min-w-0">
+            <h3 class="mb-2 text-xs uppercase tracking-wider text-slate-500">Parking · @Booked(_day.Parking) of @_day.Parking.Count booked</h3>
+            <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/5">
                 @foreach (var slot in _day.Parking)
                 {
-                    <SlotRow @key="slot.ResourceId" Slot="slot" ReadOnly="true" />
+                    <SlotRow @key="slot.ResourceId" Slot="slot" Accent="cyan" ReadOnly="true" />
                 }
             </ul>
-        </div>
+        </section>
     </div>
 
-    <p class="mt-4">
+    <p class="mt-6 text-sm text-slate-400">
         @(_day.PeopleInOffice.Count == 0 ? "Nobody booked." : $"In the office: {string.Join(", ", _day.PeopleInOffice)}")
     </p>
 }
 
 @code {
+    private const string ArrowClass = "grid h-9 w-9 place-items-center rounded-full bg-white/10 text-lg hover:bg-white/15";
+
     private DateOnly _date;
     private DayOverview? _day;
 

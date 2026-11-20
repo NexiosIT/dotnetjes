@@ -1,0 +1,58 @@
+/* Tailwind input. The build compiles this into wwwroot/app.css (see Tailwind.targets); don't edit that file. */
+@import "tailwindcss" source(none);
+@source "../Components";
+
+/* --- Blazor framework hooks (no Tailwind equivalent: these elements are created or toggled by blazor.web.js) --- */
+
+h1:focus {
+    outline: none;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid var(--color-emerald-500);
+}
+
+.invalid {
+    outline: 1px solid var(--color-rose-500);
+}
+
+.validation-message {
+    color: var(--color-rose-300);
+}
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    background: var(--color-rose-950);
+    color: var(--color-rose-100);
+    border-top: 1px solid color-mix(in oklab, var(--color-rose-500) 40%, transparent);
+}
+
+#blazor-error-ui .reload {
+    color: var(--color-rose-300);
+    text-decoration: underline;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+.blazor-error-boundary {
+    padding: 1rem;
+    border-radius: var(--radius-xl);
+    background: color-mix(in oklab, var(--color-rose-500) 15%, transparent);
+    color: var(--color-rose-100);
+}
+
+.blazor-error-boundary::after {
+    content: "An error has occurred.";
+}
