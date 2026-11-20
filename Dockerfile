@@ -3,7 +3,9 @@ WORKDIR /src
 
 # Restore first so package downloads are cached between builds.
 COPY global.json ./
-COPY src/Booking.Core/Booking.Core.csproj src/Booking.Core/
+COPY src/Booking.Domain/Booking.Domain.csproj src/Booking.Domain/
+COPY src/Booking.Application/Booking.Application.csproj src/Booking.Application/
+COPY src/Booking.Infrastructure/Booking.Infrastructure.csproj src/Booking.Infrastructure/
 COPY src/Booking.Web/Booking.Web.csproj src/Booking.Web/
 RUN dotnet restore src/Booking.Web/Booking.Web.csproj
 

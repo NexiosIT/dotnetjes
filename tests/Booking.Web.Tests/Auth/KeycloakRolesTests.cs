@@ -7,17 +7,17 @@ public class KeycloakRolesTests
     private static string Token(string payload) => TestTokens.WithPayload(payload);
 
     [Fact]
-    public void Reads_roles_of_this_client() =>
+    public void GivenATokenWithRolesForThisClient_WhenReadingClientRoles_ThenTheyAreReturned() =>
         Assert.Equal(["Admin", "other"], KeycloakRoles.ClientRoles(
             Token("""{"resource_access":{"booking":{"roles":["Admin","other"]}}}"""), "booking"));
 
     [Fact]
-    public void Ignores_roles_of_other_clients() =>
+    public void GivenATokenWithRolesForAnotherClient_WhenReadingClientRoles_ThenNoneAreReturned() =>
         Assert.Empty(KeycloakRoles.ClientRoles(
             Token("""{"resource_access":{"account":{"roles":["Admin"]}}}"""), "booking"));
 
     [Fact]
-    public void Ignores_realm_roles() =>
+    public void GivenATokenWithOnlyRealmRoles_WhenReadingClientRoles_ThenNoneAreReturned() =>
         Assert.Empty(KeycloakRoles.ClientRoles(
             Token("""{"realm_access":{"roles":["Admin"]}}"""), "booking"));
 
@@ -27,7 +27,7 @@ public class KeycloakRolesTests
     [InlineData("not-a-jwt")]
     [InlineData("a.!!!.c")]
     [InlineData("a.bm90LWpzb24.c")] // "not-json"
-    public void Malformed_or_missing_token_gives_no_roles(string? token) =>
+    public void GivenAMalformedOrMissingToken_WhenReadingClientRoles_ThenNoneAreReturned(string? token) =>
         Assert.Empty(KeycloakRoles.ClientRoles(token, "booking"));
 
     [Theory]
@@ -36,6 +36,6 @@ public class KeycloakRolesTests
     [InlineData("""{"resource_access":{"booking":{}}}""")]
     [InlineData("""{"resource_access":{"booking":{"roles":"Admin"}}}""")]
     [InlineData("""{"resource_access":{"booking":{"roles":[1,null,"Admin"]}}}""")]
-    public void Unexpected_shapes_give_only_string_roles(string payload) =>
+    public void GivenATokenPayloadOfAnUnexpectedShape_WhenReadingClientRoles_ThenOnlyStringRolesAreReturned(string payload) =>
         Assert.DoesNotContain(KeycloakRoles.ClientRoles(Token(payload), "booking"), r => r != "Admin");
 }

@@ -1,5 +1,4 @@
-using Booking.Core.Entities;
-using Booking.Core.Services;
+using Booking.Application.Bookings;
 
 namespace Booking.Web.Components.Pages;
 

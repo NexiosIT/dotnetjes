@@ -1,6 +1,5 @@
 using System.Security.Claims;
-using Booking.Core.Entities;
-using Booking.Core.People;
+using Booking.Application.People;
 using Booking.Web.CurrentUser;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -17,10 +16,10 @@ public class ClaimsCurrentUserTests
     {
         public List<(string ExternalId, string Name, string? Email)> Calls { get; } = [];
 
-        public Task<Person> SignInAsync(string externalId, string name, string? email, CancellationToken ct = default)
+        public Task<SignedInPerson> SignInAsync(string externalId, string name, string? email, CancellationToken ct = default)
         {
             Calls.Add((externalId, name, email));
-            return Task.FromResult(new Person { Id = 42, Name = name });
+            return Task.FromResult(new SignedInPerson(42, name, email, true, externalId));
         }
     }
 
@@ -28,7 +27,7 @@ public class ClaimsCurrentUserTests
         new(new ClaimsIdentity(claims.Select(c => new Claim(c.Type, c.Value)), "test"));
 
     [Fact]
-    public async Task Returns_person_id_from_directory()
+    public async Task GivenASignedInUser_WhenGettingThePersonId_ThenTheDirectoryIdIsReturnedAndSignedInOnce()
     {
         var directory = new RecordingDirectory();
         var currentUser = new ClaimsCurrentUser(new FixedAuth(LoggedIn(("sub", "abc"), ("name", "Anna"))), directory);
@@ -38,7 +37,7 @@ public class ClaimsCurrentUserTests
     }
 
     [Fact]
-    public async Task Calls_directory_once_per_circuit()
+    public async Task GivenASignedInUser_WhenGettingThePersonIdTwice_ThenTheDirectoryIsCalledOnce()
     {
         var directory = new RecordingDirectory();
         var currentUser = new ClaimsCurrentUser(new FixedAuth(LoggedIn(("sub", "abc"), ("name", "Anna"))), directory);
@@ -50,7 +49,7 @@ public class ClaimsCurrentUserTests
     }
 
     [Fact]
-    public async Task Returns_null_without_sub()
+    public async Task GivenNoSubClaim_WhenGettingThePersonId_ThenNullIsReturnedAndTheDirectoryIsNotCalled()
     {
         var directory = new RecordingDirectory();
         var currentUser = new ClaimsCurrentUser(new FixedAuth(new ClaimsPrincipal(new ClaimsIdentity())), directory);

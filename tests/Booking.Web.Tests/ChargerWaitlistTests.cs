@@ -1,5 +1,4 @@
-using Booking.Core.Entities;
-using Booking.Core.Services;
+using Booking.Application.Bookings;
 using Booking.Web.Components.Pages;
 
 namespace Booking.Web.Tests;
@@ -29,46 +28,46 @@ public class ChargerWaitlistTests
     private static readonly DayOverview AllChargersTaken = Day(true, ("P1", Ben), ("P3", Chris));
 
     [Fact]
-    public void None_when_filter_off() =>
+    public void GivenTheChargerFilterIsOff_WhenDecidingTheWaitlistLine_ThenNoneIsShown() =>
         Assert.Equal(ChargerWaitlistLine.None, ChargerWaitlist.For(AllChargersTaken, Anna, chargerFilterOn: false, onWaitlist: false, hasEmail: true));
 
     [Fact]
-    public void None_when_an_active_charger_spot_is_free() =>
+    public void GivenAnActiveChargerSpotIsFree_WhenDecidingTheWaitlistLine_ThenNoneIsShown() =>
         Assert.Equal(ChargerWaitlistLine.None, ChargerWaitlist.For(Day(true, ("P1", Ben)), Anna, true, false, true));
 
     [Fact]
-    public void None_when_person_holds_a_charger_spot() =>
+    public void GivenThePersonHoldsAChargerSpot_WhenDecidingTheWaitlistLine_ThenNoneIsShown() =>
         Assert.Equal(ChargerWaitlistLine.None, ChargerWaitlist.For(Day(true, ("P1", Anna), ("P3", Ben)), Anna, true, false, true));
 
     [Fact]
-    public void None_without_a_person() =>
+    public void GivenNoPerson_WhenDecidingTheWaitlistLine_ThenNoneIsShown() =>
         Assert.Equal(ChargerWaitlistLine.None, ChargerWaitlist.For(AllChargersTaken, null, true, false, true));
 
     [Fact]
-    public void CanJoin_when_all_taken_and_not_on_list() =>
+    public void GivenAllChargerSpotsAreTakenAndThePersonIsNotListed_WhenDecidingTheWaitlistLine_ThenItIsCanJoin() =>
         Assert.Equal(ChargerWaitlistLine.CanJoin, ChargerWaitlist.For(AllChargersTaken, Anna, true, false, true));
 
     [Fact]
-    public void OnList_when_on_list() =>
+    public void GivenAllChargerSpotsAreTakenAndThePersonIsListed_WhenDecidingTheWaitlistLine_ThenItIsOnList() =>
         Assert.Equal(ChargerWaitlistLine.OnList, ChargerWaitlist.For(AllChargersTaken, Anna, true, true, true));
 
     [Fact]
-    public void NeedsEmail_when_no_email() =>
+    public void GivenAllChargerSpotsAreTakenAndThePersonHasNoEmail_WhenDecidingTheWaitlistLine_ThenItIsNeedsEmail() =>
         Assert.Equal(ChargerWaitlistLine.NeedsEmail, ChargerWaitlist.For(AllChargersTaken, Anna, true, false, false));
 
     [Fact]
-    public void Inactive_free_charger_spot_counts_as_taken() =>
+    public void GivenAFreeChargerSpotIsInactive_WhenDecidingTheWaitlistLine_ThenItCountsAsTakenAndIsCanJoin() =>
         Assert.Equal(ChargerWaitlistLine.CanJoin, ChargerWaitlist.For(Day(false, ("P1", Ben)), Anna, true, false, true));
 
     [Fact]
-    public void True_when_person_has_parking_that_day() =>
+    public void GivenThePersonHasAParkingBookingThatDay_WhenCheckingForAParkingBooking_ThenItIsTrue() =>
         Assert.True(ChargerWaitlist.HasBookingOfType(Day(true, ("P2", Anna)), Anna, ResourceType.Parking));
 
     [Fact]
-    public void False_for_other_type() =>
+    public void GivenThePersonOnlyHasADeskBooking_WhenCheckingForAParkingBooking_ThenItIsFalse() =>
         Assert.False(ChargerWaitlist.HasBookingOfType(Day(true, ("D1", Anna)), Anna, ResourceType.Parking));
 
     [Fact]
-    public void False_for_null_person() =>
+    public void GivenNoPerson_WhenCheckingForAParkingBooking_ThenItIsFalse() =>
         Assert.False(ChargerWaitlist.HasBookingOfType(Day(true, ("P2", Anna)), null, ResourceType.Parking));
 }

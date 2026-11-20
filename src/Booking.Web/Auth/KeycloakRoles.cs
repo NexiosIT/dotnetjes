@@ -12,7 +12,6 @@ public static class KeycloakRoles
     /// <summary>The roles of <paramref name="clientId"/>; empty when the token is missing or not shaped as expected.</summary>
     public static IReadOnlyList<string> ClientRoles(string? accessToken, string clientId)
     {
-        // No signature check: the token came straight from Keycloak's token endpoint over the back channel.
         var parts = accessToken?.Split('.');
         if (parts is not { Length: 3 })
         {

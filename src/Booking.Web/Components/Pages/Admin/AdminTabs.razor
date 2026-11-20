@@ -1,5 +1,5 @@
 @* Owned by Person C. Shared header of the admin pages: title, "Send today's summary now" and the tabs. *@
-@using Booking.Core.Notifications
+@using Booking.Application.Notifications
 @inject DailySummarySender SummarySender
 @inject ILogger<AdminTabs> Logger
 
@@ -38,7 +38,6 @@
 
     private async Task SendSummaryAsync()
     {
-        // A fast double click reaches the server before the disabled button does: send once.
         if (sending)
         {
             return;
@@ -55,7 +54,6 @@
         }
         catch (Exception ex)
         {
-            // E.g. the database is unreachable: report it here rather than kill the admin's session.
             Logger.LogError(ex, "Sending the daily summary from the admin page failed");
             summaryOk = false;
             summaryMessage = "Couldn't send the summary — check the logs.";

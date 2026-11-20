@@ -1,5 +1,4 @@
-using Booking.Core.Entities;
-using Booking.Core.Services;
+using Booking.Application.Bookings;
 using Booking.Web.Components.Pages;
 
 namespace Booking.Web.Tests;
@@ -18,16 +17,16 @@ public class BookingMessagesTests
     [InlineData(BookingError.ResourceInactive, "P2 is no longer available.")]
     [InlineData(BookingError.NotFound, "That no longer exists — the page has been refreshed.")]
     [InlineData(BookingError.NotYourBooking, "You can only cancel your own bookings.")]
-    public void For_parking_slot_returns_plan_copy(BookingError error, string expected) =>
+    public void GivenAParkingSlot_WhenGettingTheMessageForAnError_ThenThePlannedCopyIsReturned(BookingError error, string expected) =>
         Assert.Equal(expected, BookingMessages.For(error, Slot("P2", ResourceType.Parking)));
 
     [Fact]
-    public void AlreadyBookedThatType_on_desk_says_desk() =>
+    public void GivenADeskSlot_WhenGettingTheAlreadyBookedThatTypeMessage_ThenItSaysDesk() =>
         Assert.Equal("You already have a desk that day.",
             BookingMessages.For(BookingError.AlreadyBookedThatType, Slot("D4", ResourceType.Desk)));
 
     [Fact]
-    public void Every_error_has_a_message()
+    public void WhenGettingTheMessageForEveryBookingError_ThenNoneIsBlank()
     {
         foreach (var error in Enum.GetValues<BookingError>())
             Assert.False(string.IsNullOrWhiteSpace(BookingMessages.For(error, Slot("D1", ResourceType.Desk))));
