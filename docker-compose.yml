@@ -10,10 +10,21 @@ services:
     volumes:
       - dpkeys:/keys
     depends_on:
+      keys-init:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
       mailpit:
         condition: service_started
+
+  # The app image is chiseled and runs as non-root (UID 1654) with no shell, so it can't fix
+  # ownership itself. Volumes created by the old root image hold root-only key files
+  # (UnauthorizedAccessException on /keys/key-*.xml); hand them to the app user before it starts.
+  keys-init:
+    image: busybox:1.37
+    command: chown -R 1654:1654 /keys
+    volumes:
+      - dpkeys:/keys
 
   db:
     image: postgres:18-alpine
