@@ -119,6 +119,32 @@ public sealed class BookingService(
             }
             : null;
 
-    public Task<BookingResult> CancelAsync(int personId, int bookingId, CancellationToken ct = default) =>
-        throw new NotImplementedException("Task A4");
+    public async Task<BookingResult> CancelAsync(int personId, int bookingId, CancellationToken ct = default)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+
+        // Check order: NotFound → NotYourBooking → OutOfRange (only today or later can be cancelled).
+        var booking = await db.Bookings.AsNoTracking().SingleOrDefaultAsync(b => b.Id == bookingId, ct);
+        if (booking is null)
+        {
+            return BookingResult.Fail(BookingError.NotFound);
+        }
+        if (booking.PersonId != personId)
+        {
+            return BookingResult.Fail(BookingError.NotYourBooking);
+        }
+        if (booking.Date < calendar.Today)
+        {
+            return BookingResult.Fail(BookingError.OutOfRange);
+        }
+
+        // A single DELETE: if a simultaneous cancel got there first, nothing is deleted and we report NotFound.
+        var deleted = await db.Bookings
+            .Where(b => b.Id == bookingId && b.PersonId == personId)
+            .ExecuteDeleteAsync(ct);
+
+        return deleted == 1
+            ? new BookingResult(true, null, null)
+            : BookingResult.Fail(BookingError.NotFound);
+    }
 }
