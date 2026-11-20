@@ -5,7 +5,7 @@
 <div class="parked" role="status" aria-label="@($"You parked in {Code}")">
     <div class="bay">
         <span class="bay-code">@Code</span>
-        <button type="button" class="car" title="Honk!" aria-label="Honk the horn" @onclick="HonkAsync">
+        <button type="button" class="car" title="Honk!" aria-label="Honk like a goose" @onclick="HonkAsync">
             <svg viewBox="0 0 120 60" width="120" height="60" aria-hidden="true">
                 <rect x="6" y="22" width="108" height="24" rx="10" fill="#e63946" />
                 <path d="M30 22 L42 6 H78 L92 22 Z" fill="#e63946" />
@@ -27,10 +27,27 @@
 
     private IJSObjectReference? _module;
 
-    private async Task HonkAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/ParkedCar.razor.js");
-        await _module.InvokeVoidAsync("honk");
+        if (firstRender)
+        {
+            await PlayAsync("vroom");   // in time with the drive-in animation
+        }
+    }
+
+    private Task HonkAsync() => PlayAsync("honk");
+
+    private async Task PlayAsync(string sound)
+    {
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/ParkedCar.razor.js");
+            await _module.InvokeVoidAsync(sound);
+        }
+        catch (JSException)
+        {
+            // No audio in this browser: the car still parks, just silently.
+        }
     }
 
     private Task Close() => Closed.InvokeAsync();
