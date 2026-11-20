@@ -12,7 +12,7 @@ public class BookingMessagesTests
     [Theory]
     [InlineData(BookingError.OutOfRange, "That day can't be booked.")]
     [InlineData(BookingError.Weekend, "The office is closed at weekends.")]
-    [InlineData(BookingError.ResourceTaken, "P2 was just taken — refresh to see who.")]
+    [InlineData(BookingError.ResourceTaken, "P2 was just taken — pick another one.")]
     [InlineData(BookingError.AlreadyBookedThatType, "You already have a parking spot that day.")]
     [InlineData(BookingError.PersonInactive, "Your profile is inactive — ask an admin.")]
     [InlineData(BookingError.ResourceInactive, "P2 is no longer available.")]

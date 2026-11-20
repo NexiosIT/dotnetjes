@@ -2,14 +2,27 @@
 
 <li class="list-group-item d-flex align-items-center gap-2">
     <strong class="slot-code">@Slot.Code</strong>
-    <span class="text-muted flex-grow-1">@Slot.Name</span>
+    <span class="text-muted flex-grow-1">
+        @Slot.Name
+        @if (Slot.Location is ParkingLocation location)
+        {
+            <span class="badge rounded-pill text-bg-light border ms-1">@ParkingLocations.Label(location)</span>
+        }
+        @if (Slot.HasCharger)
+        {
+            <span class="badge rounded-pill text-bg-success ms-1" title="EV charger">⚡ Charger</span>
+        }
+    </span>
     @if (Slot.BookingId is null)
     {
         <span>free</span>
-        <button type="button" class="btn btn-primary btn-sm" disabled="@(CurrentPersonId is null || Busy)"
-                @onclick="OnBook">Book</button>
+        @if (!ReadOnly)
+        {
+            <button type="button" class="btn btn-primary btn-sm" disabled="@(CurrentPersonId is null || Busy)"
+                    @onclick="OnBook">Book</button>
+        }
     }
-    else if (Slot.BookedByPersonId == CurrentPersonId)
+    else if (!ReadOnly && Slot.BookedByPersonId == CurrentPersonId)
     {
         <span class="fw-semibold">You</span>
         <button type="button" class="btn btn-outline-danger btn-sm" disabled="@Busy" @onclick="OnCancel">Cancel</button>
@@ -28,6 +41,9 @@
 
     /// <summary>True while a Book/Cancel call is running, so the buttons can't be double-clicked.</summary>
     [Parameter] public bool Busy { get; set; }
+
+    /// <summary>Admin overview: show who booked what, no Book/Cancel buttons.</summary>
+    [Parameter] public bool ReadOnly { get; set; }
 
     [Parameter] public EventCallback<ResourceSlot> Book { get; set; }
 

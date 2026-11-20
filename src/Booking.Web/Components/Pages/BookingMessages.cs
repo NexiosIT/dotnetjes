@@ -10,7 +10,7 @@ public static class BookingMessages
     {
         BookingError.OutOfRange => "That day can't be booked.",
         BookingError.Weekend => "The office is closed at weekends.",
-        BookingError.ResourceTaken => $"{slot.Code} was just taken — refresh to see who.",
+        BookingError.ResourceTaken => $"{slot.Code} was just taken — pick another one.",
         BookingError.AlreadyBookedThatType => slot.Type == ResourceType.Desk
             ? "You already have a desk that day."
             : "You already have a parking spot that day.",

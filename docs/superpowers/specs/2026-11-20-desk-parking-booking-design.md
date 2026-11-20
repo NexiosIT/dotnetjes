@@ -202,7 +202,7 @@ The skeleton contains: solution and projects; the full entity model with both na
 - `/` opens on `IOfficeCalendar.FirstBookableDay`. ◀ ▶ step through weekdays using the calendar; arrows disable outside the bookable range.
 - Two columns, Desks and Parking. Each row: code, name, and either *free* + **Book**, *taken by X*, or *You* + **Cancel**.
 - Below: "In the office: …" list.
-- Errors from `BookingResult` show inline in plain language (e.g. "P2 was just taken — refresh to see who").
+- Errors from `BookingResult` show inline in plain language (e.g. "P2 was just taken — pick another one").
 
 ```
  Fri 20 Nov      [◀] [▶]                 You: Anna ▾

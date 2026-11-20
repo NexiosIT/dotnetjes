@@ -54,6 +54,22 @@ public sealed class GetDayTests(PostgresFixture postgres)
     }
 
     [Fact]
+    public async Task GetDay_includes_parking_location_and_charger()
+    {
+        var ctx = await BookingTestContext.CreateAsync(postgres);
+
+        var day = await ctx.Service.GetDayAsync(ctx.Today);
+
+        var p1 = day.Parking.Single(s => s.Code == "P1");
+        Assert.Equal(Booking.Core.Entities.ParkingLocation.Basement, p1.Location);
+        Assert.True(p1.HasCharger);
+        var p4 = day.Parking.Single(s => s.Code == "P4");
+        Assert.Equal(Booking.Core.Entities.ParkingLocation.BehindTheBuilding, p4.Location);
+        Assert.False(p4.HasCharger);
+        Assert.All(day.Desks, d => Assert.Null(d.Location));
+    }
+
+    [Fact]
     public async Task GetDay_only_shows_bookings_for_that_date()
     {
         var ctx = await BookingTestContext.CreateAsync(postgres);

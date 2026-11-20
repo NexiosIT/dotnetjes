@@ -51,6 +51,7 @@ internal sealed class FakeAdminService(params Person[] people) : IAdminService
     public Task<IReadOnlyList<Resource>> GetResourcesAsync(CancellationToken ct = default) => throw new NotSupportedException();
     public Task<Resource> AddResourceAsync(string code, string name, ResourceType type, CancellationToken ct = default) => throw new NotSupportedException();
     public Task UpdateResourceAsync(int id, string code, string name, bool isActive, CancellationToken ct = default) => throw new NotSupportedException();
+    public Task SetParkingDetailsAsync(int id, ParkingLocation? location, bool hasCharger, CancellationToken ct = default) => throw new NotSupportedException();
     public Task SetPersonActiveAsync(int id, bool isActive, CancellationToken ct = default) => throw new NotSupportedException();
 }
 

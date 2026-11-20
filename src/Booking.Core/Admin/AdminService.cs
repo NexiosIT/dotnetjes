@@ -50,6 +50,20 @@ public sealed class AdminService(IDbContextFactory<BookingDbContext> dbFactory) 
         await SaveAsync(db, normalizedCode, ct);
     }
 
+    public async Task SetParkingDetailsAsync(int id, ParkingLocation? location, bool hasCharger, CancellationToken ct = default)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var resource = await db.Resources.SingleOrDefaultAsync(r => r.Id == id, ct) ?? throw Gone();
+        if (resource.Type != ResourceType.Parking && (location is not null || hasCharger))
+        {
+            throw new AdminValidationException("Only parking spots have a location or charger.");
+        }
+
+        resource.Location = location;
+        resource.HasCharger = hasCharger;
+        await db.SaveChangesAsync(ct);
+    }
+
     public async Task<IReadOnlyList<Person>> GetPeopleAsync(CancellationToken ct = default)
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
