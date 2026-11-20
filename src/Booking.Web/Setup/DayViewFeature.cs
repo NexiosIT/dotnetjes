@@ -7,7 +7,7 @@ public static class DayViewFeature
 {
     public static IServiceCollection AddDayViewFeature(this IServiceCollection services)
     {
-        services.AddScoped<ICurrentUser, LocalStorageCurrentUser>();
+        services.AddScoped<ICurrentUser, ClaimsCurrentUser>();
         return services;
     }
 }

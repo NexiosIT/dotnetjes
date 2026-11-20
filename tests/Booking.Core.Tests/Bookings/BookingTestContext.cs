@@ -43,6 +43,7 @@ public sealed class BookingTestContext
         var dbFactory = await postgres.CreateDatabaseAsync();
         await using var db = await dbFactory.CreateDbContextAsync();
         await SeedData.EnsureSeededAsync(db);
+        await DemoPeople.AddAsync(db);
 
         var people = await db.People.ToDictionaryAsync(p => p.Name, p => p.Id);
         var resources = await db.Resources.ToDictionaryAsync(r => r.Code, r => r.Id);
