@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/require-method-comments.sh\"",
+            "timeout": 30,
+            "statusMessage": "Checking method comments were removed before commit"
+          }
+        ]
+      }
+    ]
+  }
+}
