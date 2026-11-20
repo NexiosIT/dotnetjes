@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Booking.Core.People;
 using Booking.Web.Auth;
 using Microsoft.AspNetCore.Authentication;
@@ -10,7 +11,10 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Booking.Web.Setup;
 
-/// <summary>Login through the organisation's Keycloak. Every page requires it.</summary>
+/// <summary>
+/// Login through the organisation's Keycloak. Every page requires it; the Admin pages also require
+/// the Keycloak client role <see cref="AdminAccess.Role"/> (policy <see cref="AdminAccess.Policy"/>).
+/// </summary>
 public static class AuthFeature
 {
     public static IServiceCollection AddAuthFeature(this IServiceCollection services, IConfiguration configuration)
@@ -25,7 +29,7 @@ public static class AuthFeature
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddCookie()
+            .AddCookie(cookie => cookie.AccessDeniedPath = "/access-denied")
             .AddOpenIdConnect();
 
         services.AddOptions<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme)
@@ -52,10 +56,15 @@ public static class AuthFeature
                 oidc.SaveTokens = true; // the id token is sent as id_token_hint on logout
                 oidc.MapInboundClaims = false; // keep Keycloak's names: sub, name, email, preferred_username
                 oidc.TokenValidationParameters.NameClaimType = "name";
+                oidc.TokenValidationParameters.RoleClaimType = AdminAccess.RoleClaimType;
+                oidc.Events.OnTokenValidated = AddRolesAsync;
             });
 
         services.AddAuthorization(options =>
-            options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+        {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            options.AddPolicy(AdminAccess.Policy, policy => policy.RequireAuthenticatedUser().RequireRole(AdminAccess.Role));
+        });
         services.AddCascadingAuthenticationState();
 
         services.AddScoped<IPersonDirectory, PersonDirectory>();
@@ -77,6 +86,22 @@ public static class AuthFeature
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         context.Response.ContentType = "text/plain; charset=utf-8";
         await context.Response.WriteAsync("Login failed. Please try again later or contact the administrator.");
+    }
+
+    /// <summary>
+    /// Keycloak puts client roles only in the access token, not in the ID token the login identity is built from.
+    /// Copy this client's roles onto the identity so they end up in the login cookie. Read once per login.
+    /// </summary>
+    public static Task AddRolesAsync(TokenValidatedContext context)
+    {
+        if (context.Principal?.Identity is ClaimsIdentity identity)
+        {
+            foreach (var role in KeycloakRoles.ClientRoles(context.TokenEndpointResponse?.AccessToken, context.Options.ClientId ?? ""))
+            {
+                identity.AddClaim(new Claim(identity.RoleClaimType, role));
+            }
+        }
+        return Task.CompletedTask;
     }
 
     public static WebApplication MapAuthEndpoints(this WebApplication app)
