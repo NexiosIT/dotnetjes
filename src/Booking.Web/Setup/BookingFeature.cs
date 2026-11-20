@@ -10,6 +10,7 @@ public static class BookingFeature
     {
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IWaitlistService, WaitlistService>();
+        services.AddSingleton<IWaitlistNotifier, NoWaitlistNotifier>();
         return services;
     }
 }

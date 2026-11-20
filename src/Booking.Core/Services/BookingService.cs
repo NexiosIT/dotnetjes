@@ -1,6 +1,7 @@
 using Booking.Core.Calendar;
 using Booking.Core.Data;
 using Booking.Core.Entities;
+using Booking.Core.Waitlist;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using BookingEntity = Booking.Core.Entities.Booking;
@@ -11,7 +12,8 @@ namespace Booking.Core.Services;
 public sealed class BookingService(
     IDbContextFactory<BookingDbContext> dbFactory,
     IOfficeCalendar calendar,
-    TimeProvider time) : IBookingService
+    TimeProvider time,
+    IWaitlistNotifier notifier) : IBookingService
 {
     public async Task<DayOverview> GetDayAsync(DateOnly date, CancellationToken ct = default)
     {
@@ -95,6 +97,12 @@ public sealed class BookingService(
             Date = date,
             CreatedAt = time.GetUtcNow().UtcDateTime
         };
+        // Getting a charger spot takes you off that day's waitlist, in the same transaction as the booking.
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        if (IsChargerSpot(resource))
+        {
+            await db.Waitlist.Where(w => w.PersonId == person.Id && w.Date == date).ExecuteDeleteAsync(ct);
+        }
         db.Bookings.Add(booking);
         try
         {
@@ -105,6 +113,7 @@ public sealed class BookingService(
             // ...and the unique indexes decide simultaneous clicks that both passed the pre-checks.
             return BookingResult.Fail(conflict);
         }
+        await transaction.CommitAsync(ct);
 
         return BookingResult.Ok(booking.Id);
     }
@@ -124,7 +133,7 @@ public sealed class BookingService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
         // Check order: NotFound → NotYourBooking → OutOfRange (only today or later can be cancelled).
-        var booking = await db.Bookings.AsNoTracking().SingleOrDefaultAsync(b => b.Id == bookingId, ct);
+        var booking = await db.Bookings.AsNoTracking().Include(b => b.Resource).SingleOrDefaultAsync(b => b.Id == bookingId, ct);
         if (booking is null)
         {
             return BookingResult.Fail(BookingError.NotFound);
@@ -143,8 +152,19 @@ public sealed class BookingService(
             .Where(b => b.Id == bookingId && b.PersonId == personId)
             .ExecuteDeleteAsync(ct);
 
-        return deleted == 1
-            ? new BookingResult(true, null, null)
-            : BookingResult.Fail(BookingError.NotFound);
+        if (deleted != 1)
+        {
+            return BookingResult.Fail(BookingError.NotFound);
+        }
+
+        if (IsChargerSpot(booking.Resource))
+        {
+            notifier.ChargerSpotFreed(new ChargerSpotFreed(booking.Date, booking.ResourceId, personId));
+        }
+        return new BookingResult(true, null, null);
     }
+
+    /// <summary>The spots the waitlist is about (charger waitlist design).</summary>
+    private static bool IsChargerSpot(Resource resource) =>
+        resource is { Type: ResourceType.Parking, HasCharger: true, IsActive: true };
 }

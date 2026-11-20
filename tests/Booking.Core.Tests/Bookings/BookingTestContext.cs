@@ -2,6 +2,7 @@ using Booking.Core.Calendar;
 using Booking.Core.Data;
 using Booking.Core.Services;
 using Booking.Core.Tests.Infrastructure;
+using Booking.Core.Tests.Waitlist;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Time.Testing;
 using BookingEntity = Booking.Core.Entities.Booking;
@@ -23,6 +24,7 @@ public sealed class BookingTestContext
         IDbContextFactory<BookingDbContext> dbFactory,
         FakeTimeProvider time,
         OfficeCalendar calendar,
+        RecordingNotifier notifier,
         BookingService service,
         Dictionary<string, int> people,
         Dictionary<string, int> resources)
@@ -30,6 +32,7 @@ public sealed class BookingTestContext
         DbFactory = dbFactory;
         Time = time;
         Calendar = calendar;
+        Notifier = notifier;
         Service = service;
         _people = people;
         _resources = resources;
@@ -38,6 +41,7 @@ public sealed class BookingTestContext
     public IDbContextFactory<BookingDbContext> DbFactory { get; }
     public FakeTimeProvider Time { get; }
     public OfficeCalendar Calendar { get; }
+    public RecordingNotifier Notifier { get; }
     public BookingService Service { get; }
     public DateOnly Today { get; } = new(2026, 11, 18);
 
@@ -55,7 +59,8 @@ public sealed class BookingTestContext
         var zone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Brussels");
         var calendar = new OfficeCalendar(time, zone, maxDaysAhead: 14);
 
-        return new BookingTestContext(dbFactory, time, calendar, new BookingService(dbFactory, calendar, time), people, resources);
+        var notifier = new RecordingNotifier();
+        return new BookingTestContext(dbFactory, time, calendar, notifier, new BookingService(dbFactory, calendar, time, notifier), people, resources);
     }
 
     public int Person(string name) => _people[name];
