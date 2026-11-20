@@ -18,7 +18,7 @@ Today every logged-in user can open the Admin pages (Desks & parking, People, "S
 ## Non-goals
 
 - Any admin flag in the app's database.
-- Role changes taking effect mid-session. Roles are read at login; a granted or removed role applies on the next login. *(my call: acceptable for an admin role; the cookie is the session)*
+- Role changes taking effect mid-session. Roles are read at login; a granted or removed role applies on the next login. Logins last 10 hours without renewal, so that is the next working day at the latest. *(decided after review: the default 14-day sliding cookie could mean never)*
 - Other roles or finer-grained permissions.
 
 ## Anti-goals

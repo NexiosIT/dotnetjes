@@ -29,7 +29,14 @@ public static class AuthFeature
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddCookie(cookie => cookie.AccessDeniedPath = "/access-denied")
+            .AddCookie(cookie =>
+            {
+                cookie.AccessDeniedPath = "/access-denied";
+                // Roles are only read at login. One working day without renewal means a removed Admin role
+                // applies by the next day at the latest (the default 14 days sliding could mean never).
+                cookie.ExpireTimeSpan = TimeSpan.FromHours(10);
+                cookie.SlidingExpiration = false;
+            })
             .AddOpenIdConnect();
 
         services.AddOptions<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme)

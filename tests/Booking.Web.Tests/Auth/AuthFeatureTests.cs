@@ -101,6 +101,18 @@ public class AuthFeatureTests
             .Get(CookieAuthenticationDefaults.AuthenticationScheme).AccessDeniedPath.Value);
 
     [Fact]
+    public void Login_lasts_one_working_day_without_renewal()
+    {
+        // Roles are read at login; a fixed lifetime makes a removed Admin role apply by the next day at the latest.
+        var cookie = ConfiguredServices()
+            .GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>()
+            .Get(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        Assert.Equal(TimeSpan.FromHours(10), cookie.ExpireTimeSpan);
+        Assert.False(cookie.SlidingExpiration);
+    }
+
+    [Fact]
     public async Task Token_validated_adds_client_roles_as_role_claims()
     {
         var context = TokenValidated(TestTokens.WithPayload("""{"resource_access":{"app":{"roles":["Admin"]}}}"""));
