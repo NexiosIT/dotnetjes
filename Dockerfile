@@ -8,7 +8,9 @@ COPY src/Booking.Web/Booking.Web.csproj src/Booking.Web/
 RUN dotnet restore src/Booking.Web/Booking.Web.csproj
 
 COPY src/ src/
-RUN dotnet publish src/Booking.Web/Booking.Web.csproj -c Release -o /app --no-restore
+# No --no-restore: the restore above runs before the .razor files exist, so it skips the package
+# that ships _framework/blazor.web.js (white screen). Publish restores again with all sources present.
+RUN dotnet publish src/Booking.Web/Booking.Web.csproj -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
