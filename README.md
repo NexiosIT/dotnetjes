@@ -62,15 +62,24 @@ The Keycloak client must be confidential with the standard flow, and allow these
 dotnet test
 ```
 
-`Booking.Core.Tests` start a throwaway Postgres container with Testcontainers, so **Docker must be running**. `Booking.Web.Tests` need nothing.
+`Booking.IntegrationTests` start a throwaway Postgres container with Testcontainers, so **Docker must be running**. `Booking.Domain.Tests` and `Booking.Web.Tests` need nothing.
 
 ## Project layout
 
+Domain-driven design with a clean-architecture split; every project depends only on the ones above it:
+
 ```
-src/Booking.Core   booking rules, waitlist, emails, EF Core model and migrations (no web dependencies)
-src/Booking.Web    Blazor UI, Keycloak login, SMTP, background services, DI setup (Setup/*Feature.cs)
-tests/             one test project per src project
-docs/superpowers   design docs (specs/) and implementation plans (plans/) for each feature
+src/Booking.Domain          entities that enforce their own rules (Booking, Resource, Person, WaitlistEntry),
+                            office calendar, domain errors and events. No frameworks.
+src/Booking.Application     use cases (book, switch, cancel, waitlist, admin, sign-in, emails) and the ports
+                            they need: unit of work + repositories, day overview query, email sender, notifier.
+src/Booking.Infrastructure  EF Core + PostgreSQL (DbContext, migrations, repositories), SMTP, background jobs.
+src/Booking.Web             Blazor UI, Keycloak login, composition root (Program.cs).
+
+tests/Booking.Domain.Tests        fast unit tests of the domain rules
+tests/Booking.IntegrationTests    use cases against real PostgreSQL (Testcontainers)
+tests/Booking.Web.Tests           UI logic, login and authorization
+docs/superpowers                  design docs (specs/) and implementation plans (plans/) for each feature
 ```
 
 ## Styling (Tailwind CSS)
