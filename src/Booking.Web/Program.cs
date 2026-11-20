@@ -32,7 +32,7 @@ builder.Services.AddSingleton<IOfficeCalendar>(sp => new OfficeCalendar(
     TimeZoneInfo.FindSystemTimeZoneById(builder.Configuration["App:TimeZone"] ?? "Europe/Brussels"),
     builder.Configuration.GetValue("Booking:MaxDaysAhead", 14)));
 
-builder.Services.AddBookingFeature();                    // Person A
+builder.Services.AddBookingFeature(builder.Configuration); // Person A
 builder.Services.AddDayViewFeature();                    // Person B
 builder.Services.AddAdminFeature(builder.Configuration); // Person C
 builder.Services.AddAuthFeature(builder.Configuration);  // Keycloak login

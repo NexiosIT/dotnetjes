@@ -80,4 +80,17 @@ public sealed class GetDayTests(PostgresFixture postgres)
         Assert.Null(day.Desks.Single(s => s.Code == "D2").BookingId);
         Assert.Empty(day.PeopleInOffice);
     }
+
+    [Fact]
+    public async Task GetDay_marks_inactive_slots()
+    {
+        var ctx = await BookingTestContext.CreateAsync(postgres);
+        await ctx.InsertBooking("Anna", "P1", ctx.Today);
+        await ctx.DeactivateResource("P1");
+
+        var day = await ctx.Service.GetDayAsync(ctx.Today);
+
+        Assert.False(day.Parking.Single(s => s.Code == "P1").IsActive);
+        Assert.True(day.Parking.Single(s => s.Code == "P3").IsActive);
+    }
 }

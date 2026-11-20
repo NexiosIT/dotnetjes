@@ -9,7 +9,7 @@
         @if (!ReadOnly)
         {
             <button type="button" class="@BookButton" disabled="@(CurrentPersonId is null || Busy)"
-                    @onclick="OnBook">Book</button>
+                    @onclick="OnBook">@(CanSwitch ? "Switch here" : "Book")</button>
         }
     </li>
 }
@@ -56,6 +56,11 @@ else
 
     [Parameter] public EventCallback<ResourceSlot> Cancel { get; set; }
 
+    /// <summary>The person already has a booking of this type that day: the free spot offers "Switch here" instead of "Book".</summary>
+    [Parameter] public bool CanSwitch { get; set; }
+
+    [Parameter] public EventCallback<ResourceSlot> Switch { get; set; }
+
     private bool IsCyan => Accent == "cyan";
 
     // Full class names (not built from Accent) so the Tailwind build can find them.
@@ -79,7 +84,7 @@ else
         </span>
     };
 
-    private Task OnBook() => Book.InvokeAsync(Slot);
+    private Task OnBook() => CanSwitch ? Switch.InvokeAsync(Slot) : Book.InvokeAsync(Slot);
 
     private Task OnCancel() => Cancel.InvokeAsync(Slot);
 }
