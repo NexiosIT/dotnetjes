@@ -54,5 +54,6 @@ public sealed class DatabaseTests(PostgresFixture postgres)
         Assert.Contains("IX_Bookings_Resource_Date", indexNames);
         Assert.Contains("IX_Bookings_Person_Type_Date", indexNames);
         Assert.Contains("IX_Resources_Code", indexNames);
+        Assert.Contains("IX_People_ExternalId", indexNames);
     }
 }
