@@ -1,7 +1,6 @@
 @page "/"
 @* Owned by Person B — tasks B2 and B3. *@
 @using System.Globalization
-@implements IDisposable
 @inject IBookingService Bookings
 @inject IOfficeCalendar Calendar
 @inject ICurrentUser CurrentUser
@@ -15,11 +14,6 @@
     <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Next day"
             disabled="@(!CanGoForward)" @onclick="GoForward">▶</button>
 </div>
-
-@if (_personId is null)
-{
-    <p class="alert alert-info py-2">Pick who you are to book.</p>
-}
 
 @if (_day is null)
 {
@@ -78,7 +72,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        CurrentUser.Changed += OnCurrentUserChanged;
         _date = Calendar.FirstBookableDay;
         _personId = await CurrentUser.GetPersonIdAsync();
         await LoadDay();
@@ -130,12 +123,4 @@ else
             _busy = false;
         }
     }
-
-    private void OnCurrentUserChanged() => _ = InvokeAsync(async () =>
-    {
-        _personId = await CurrentUser.GetPersonIdAsync();
-        StateHasChanged();
-    });
-
-    public void Dispose() => CurrentUser.Changed -= OnCurrentUserChanged;
 }

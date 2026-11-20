@@ -1,0 +1,11 @@
+@using Booking.Web.Auth
+
+<AuthorizeView>
+    <div class="d-flex align-items-center gap-2">
+        <span>@KeycloakClaims.Read(context.User)?.Name</span>
+        <form method="post" action="logout">
+            <AntiforgeryToken />
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Log out</button>
+        </form>
+    </div>
+</AuthorizeView>
