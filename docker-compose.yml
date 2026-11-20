@@ -6,6 +6,8 @@ services:
     environment:
       ConnectionStrings__Booking: "Host=db;Port=5432;Database=booking;Username=booking;Password=booking"
       Smtp__Host: mailpit
+      # Link in the waitlist emails. Production: set APP_PUBLIC_URL in .env to the public address.
+      App__PublicUrl: ${APP_PUBLIC_URL:-http://localhost:8080}
       DataProtection__KeysPath: /keys
       # From .env (copy .env.example). Never commit the secret.
       Keycloak__Authority: ${KEYCLOAK_AUTHORITY:-}

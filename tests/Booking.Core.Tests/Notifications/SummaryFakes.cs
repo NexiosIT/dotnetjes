@@ -39,6 +39,9 @@ internal sealed class FakeBookingService(DayOverview day) : IBookingService
     public Task<BookingResult> BookAsync(int personId, int resourceId, DateOnly date, CancellationToken ct = default) =>
         throw new NotSupportedException();
 
+    public Task<BookingResult> SwitchAsync(int personId, int resourceId, DateOnly date, CancellationToken ct = default) =>
+        throw new NotSupportedException();
+
     public Task<BookingResult> CancelAsync(int personId, int bookingId, CancellationToken ct = default) =>
         throw new NotSupportedException();
 }

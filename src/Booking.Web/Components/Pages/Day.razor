@@ -4,6 +4,8 @@
 @inject IBookingService Bookings
 @inject IOfficeCalendar Calendar
 @inject ICurrentUser CurrentUser
+@inject IWaitlistService Waitlist
+@using Booking.Core.Waitlist
 
 <PageTitle>Book</PageTitle>
 
@@ -27,6 +29,8 @@
 else
 {
     var deskCount = Count(_day.Desks);
+    var hasDesk = ChargerWaitlist.HasBookingOfType(_day, _personId, ResourceType.Desk);
+    var hasParking = ChargerWaitlist.HasBookingOfType(_day, _personId, ResourceType.Parking);
     var parkingCount = Count(_day.Parking);
 
     <div class="mb-5 grid grid-cols-2 gap-3">
@@ -58,7 +62,8 @@ else
                 <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/5">
                     @foreach (var slot in desks)
                     {
-                        <SlotRow @key="slot.ResourceId" Slot="slot" Accent="fuchsia" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
+                        <SlotRow @key="slot.ResourceId" Slot="slot" Accent="fuchsia" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel"
+                                 CanSwitch="hasDesk" Switch="Switch" />
                     }
                 </ul>
             }
@@ -86,9 +91,28 @@ else
                 <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/5">
                     @foreach (var slot in parking)
                     {
-                        <SlotRow @key="slot.ResourceId" Slot="slot" Accent="cyan" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel" />
+                        <SlotRow @key="slot.ResourceId" Slot="slot" Accent="cyan" CurrentPersonId="_personId" Busy="_busy" Book="Book" Cancel="Cancel"
+                                 CanSwitch="hasParking" Switch="Switch" />
                     }
                 </ul>
+            }
+            @switch (ChargerWaitlist.For(_day, _personId, _chargerOnly, _onWaitlist, _hasEmail))
+            {
+                case ChargerWaitlistLine.CanJoin:
+                    <div class="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-amber-400/10 px-4 py-3 text-sm text-amber-100 ring-1 ring-amber-400/30">
+                        <span class="flex-1">All charger spots are taken on @DateText.</span>
+                        <button type="button" class="@WaitlistButton" disabled="@_busy" @onclick="JoinWaitlist">Notify me when one frees up</button>
+                    </div>
+                    break;
+                case ChargerWaitlistLine.OnList:
+                    <div class="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-amber-400/10 px-4 py-3 text-sm text-amber-100 ring-1 ring-amber-400/30">
+                        <span class="flex-1">You're on the waitlist for a charger spot on @DateText.</span>
+                        <button type="button" class="@LeaveButton" disabled="@_busy" @onclick="LeaveWaitlist">Leave</button>
+                    </div>
+                    break;
+                case ChargerWaitlistLine.NeedsEmail:
+                    <p class="mt-3 rounded-xl bg-white/5 px-4 py-3 text-sm text-slate-400">@WaitlistMessages.For(WaitlistError.NoEmail)</p>
+                    break;
             }
         </section>
     </div>
@@ -117,6 +141,14 @@ else
         ? "rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-slate-950"
         : "rounded-full bg-white/5 px-3 py-1 text-xs text-amber-300 ring-1 ring-amber-400/30 hover:bg-white/10";
 
+    private const string WaitlistButton =
+        "shrink-0 rounded-lg bg-amber-400 px-3 py-1 text-xs font-semibold text-slate-950 enabled:hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40";
+
+    private const string LeaveButton =
+        "shrink-0 rounded-lg px-3 py-1 text-xs ring-1 ring-white/20 enabled:hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40";
+
+    private string DateText => _date.ToString("ddd d MMM", CultureInfo.InvariantCulture);
+
     /// <summary>Free and total for the counters: all of the day's slots, not just the filtered list.</summary>
     private static (int Free, int Total) Count(IReadOnlyList<ResourceSlot> slots) =>
         (slots.Count(s => s.BookingId is null), slots.Count);
@@ -128,6 +160,8 @@ else
     private bool _busy;         // a Book/Cancel call is running — buttons are disabled
     private ParkingLocation? _location;   // parking filter; null = all locations
     private bool _chargerOnly;           // parking filter: only spots with an EV charger
+    private bool _onWaitlist;            // on the charger waitlist for _date
+    private bool _hasEmail;              // the waitlist needs an email address (from Keycloak)
 
     private bool CanGoBack => Calendar.PreviousWeekday(_date) >= Calendar.FirstBookableDay;
 
@@ -140,7 +174,15 @@ else
         await LoadDay();
     }
 
-    private async Task LoadDay() => _day = await Bookings.GetDayAsync(_date);
+    private async Task LoadDay()
+    {
+        _day = await Bookings.GetDayAsync(_date);
+        if (_personId is int personId)
+        {
+            _onWaitlist = await Waitlist.IsOnWaitlistAsync(personId, _date);
+            _hasEmail = await Waitlist.HasEmailAsync(personId);
+        }
+    }
 
     private async Task GoBack()
     {
@@ -162,6 +204,40 @@ else
         _personId is int personId
             ? Run(slot, () => Bookings.BookAsync(personId, slot.ResourceId, _date))
             : Task.CompletedTask;
+
+    private Task Switch(ResourceSlot slot) =>
+        _personId is int personId
+            ? Run(slot, () => Bookings.SwitchAsync(personId, slot.ResourceId, _date))
+            : Task.CompletedTask;
+
+    private Task JoinWaitlist() => RunWaitlist(async personId =>
+    {
+        var result = await Waitlist.JoinAsync(personId, _date);
+        return result.Error is WaitlistError error ? WaitlistMessages.For(error) : null;
+    });
+
+    private Task LeaveWaitlist() => RunWaitlist(async personId =>
+    {
+        await Waitlist.LeaveAsync(personId, _date);
+        return null;
+    });
+
+    /// <summary>Runs one waitlist action like <see cref="Run"/>: one at a time, shows its error, always reloads.</summary>
+    private async Task RunWaitlist(Func<int, Task<string?>> action)
+    {
+        if (_busy || _personId is not int personId) return;
+        _busy = true;
+        _message = null;
+        try
+        {
+            _message = await action(personId);
+            await LoadDay();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
 
     private Task Cancel(ResourceSlot slot) =>
         _personId is int personId && slot.BookingId is int bookingId
