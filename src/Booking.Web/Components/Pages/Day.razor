@@ -1,6 +1,108 @@
 @page "/"
 @* Owned by Person B — tasks B2 and B3. *@
+@using System.Globalization
+@implements IDisposable
+@inject IBookingService Bookings
+@inject IOfficeCalendar Calendar
+@inject ICurrentUser CurrentUser
 
 <PageTitle>Book</PageTitle>
 
-<h1>Book a desk or parking spot</h1>
+<div class="d-flex align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0 me-2">@_date.ToString("ddd d MMM", CultureInfo.InvariantCulture)</h1>
+    <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Previous day"
+            disabled="@(!CanGoBack)" @onclick="GoBack">◀</button>
+    <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Next day"
+            disabled="@(!CanGoForward)" @onclick="GoForward">▶</button>
+</div>
+
+@if (_personId is null)
+{
+    <p class="alert alert-info py-2">Pick who you are to book.</p>
+}
+
+@if (_day is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <div class="row g-4">
+        <div class="col-md-6">
+            <h2 class="h6 text-uppercase">Desks</h2>
+            <ul class="list-group">
+                @foreach (var slot in _day.Desks)
+                {
+                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Book="Book" Cancel="Cancel" />
+                }
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h2 class="h6 text-uppercase">Parking</h2>
+            <ul class="list-group">
+                @foreach (var slot in _day.Parking)
+                {
+                    <SlotRow @key="slot.ResourceId" Slot="slot" CurrentPersonId="_personId" Book="Book" Cancel="Cancel" />
+                }
+            </ul>
+        </div>
+    </div>
+
+    <p class="mt-4">
+        @if (_day.PeopleInOffice.Count == 0)
+        {
+            @:Nobody booked yet.
+        }
+        else
+        {
+            @:In the office: @string.Join(", ", _day.PeopleInOffice)
+        }
+    </p>
+}
+
+@code {
+    private DateOnly _date;
+    private DayOverview? _day;
+    private int? _personId;
+
+    private bool CanGoBack => Calendar.PreviousWeekday(_date) >= Calendar.FirstBookableDay;
+
+    private bool CanGoForward => Calendar.NextWeekday(_date) <= Calendar.LastBookableDay;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser.Changed += OnCurrentUserChanged;
+        _date = Calendar.FirstBookableDay;
+        _personId = await CurrentUser.GetPersonIdAsync();
+        await LoadDay();
+    }
+
+    private async Task LoadDay() => _day = await Bookings.GetDayAsync(_date);
+
+    private async Task GoBack()
+    {
+        if (!CanGoBack) return;
+        _date = Calendar.PreviousWeekday(_date);
+        await LoadDay();
+    }
+
+    private async Task GoForward()
+    {
+        if (!CanGoForward) return;
+        _date = Calendar.NextWeekday(_date);
+        await LoadDay();
+    }
+
+    // Wired up in task B3.
+    private Task Book(ResourceSlot slot) => Task.CompletedTask;
+
+    private Task Cancel(ResourceSlot slot) => Task.CompletedTask;
+
+    private void OnCurrentUserChanged() => _ = InvokeAsync(async () =>
+    {
+        _personId = await CurrentUser.GetPersonIdAsync();
+        StateHasChanged();
+    });
+
+    public void Dispose() => CurrentUser.Changed -= OnCurrentUserChanged;
+}
